@@ -8,7 +8,8 @@ require "config"
 require "cocos.init"
 
 local function main()
-    require("app.MyApp"):create():run()
+    local scene = require("app.GameScene.StartScene").new()
+	cc.Director:getInstance():replaceScene(scene)
 end
 
 local status, msg = xpcall(main, __G__TRACKBACK__)
