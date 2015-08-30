@@ -76,5 +76,9 @@ function Hero:Idle()
 	self.state_ = "IDLE"
 end
 
+function Hero:getState(  )
+	return self.state_
+end
+
 
 return Hero

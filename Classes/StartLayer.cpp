@@ -1,9 +1,12 @@
 #include "StartLayer.h"
-#include "cocos-ext.h"
 #include "CCLuaEngine.h"
+
+#include "cocostudio/CocoStudio.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
+
+using namespace ui;
 
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32)
 #include <dirent.h>
@@ -23,9 +26,18 @@ Scene* StartLayer::createScene(){
 
 bool StartLayer::init(){
 
-	auto m_address = FileUtils::getInstance()->getWritablePath();
 
-	
+	this->checkNeedUpdate();
+
+
+
+	return true;
+}
+
+void StartLayer::checkNeedUpdate(){
+	m_address = FileUtils::getInstance()->getWritablePath();
+
+
 
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32)
 	DIR *pDir = NULL;
@@ -43,48 +55,105 @@ bool StartLayer::init(){
 #endif
 	auto size = Director::getInstance()->getWinSize();
 
-	auto lb = Label::createWithSystemFont("startLayer", "Courier", 50);
-	lb->setPosition(size / 2);
-	addChild(lb);
+	FileUtils::getInstance()->addSearchPath(m_address, true);
 
-	FileUtils::getInstance()->addSearchPath(m_address,true);
-
-	auto assetMrg = AssetsManager::create("http://192.168.1.130/advenLua.zip",
-		"http://192.168.1.130/version.php",
+	_assetManager = AssetsManager::create("http://112.74.214.142/advenLua.zip",
+		"http://112.74.214.142/version.php",
 		m_address.c_str(),
-		[lb, m_address](int a){
-		log("error,%d",a);
-		lb->setString("Error");
-		if (a == 2) {
-			auto engine = LuaEngine::getInstance();
-			auto address = m_address + "src/main.lua";
-			engine->executeScriptFile(address.c_str());
-		}
-	},
-		[lb](int a){
-		log("down loading");
-		lb->setString("downLoading");
-	},
-		[lb, m_address](){
-		log("success~~~~");
-		lb->setString("success~~~~~");
+		[this](int a){
+		log("error,%d", a);
+		
+		this->goToLua();
+		
 
-		auto engine = LuaEngine::getInstance();
-		auto address = m_address + "src/main.lua";
-		engine->executeScriptFile(address.c_str());
+	},
+		[this](int a){
+		log("down loading");
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+		text->setText("now is downLoading...");
+
+#else
+		text->setText("正在下载");
+#endif
+
+		loadingBar->setPercent(a);
+
+	},
+		[this](){
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+		text->setText("now is getInto Game...");
+
+#else
+		text->setText("正在进入游戏");
+#endif
+
+		this->goToLua();
+
 
 	});
-	assetMrg->retain();
+	_assetManager->retain();
 	//assetMrg->setConnectionTimeout(3);
-	if (assetMrg->checkUpdate()){
-		assetMrg->update();
-	};
+	if (_assetManager->checkUpdate()){
+		//如果有更新，显示出玩家更新的提示面板
+		this->addAssetLayer();
+	}
+	else{
+		this->goToLua();
+	}
+		
+
+}
+
+void StartLayer::addAssetLayer(){
+	FileUtils::getInstance()->addSearchPath("res/", true);
+	auto assetNode = CSLoader::createNode("Scene/LoadingAsetLayer.csb");
 	
+	auto size = Director::getInstance()->getWinSize();
+	auto m_size = Size(size.width / 960, size.height / 640);
+	assetNode->setScaleX(m_size.width);
+	assetNode->setScaleY(m_size.height);
+	assetNode->runAction(Sequence::createWithTwoActions(Place::create(Vec2(0, size.height)),
+		MoveBy::create(0.3, Vec2(0, -size.height))));
+	addChild(assetNode);
+
+	auto btnCancel = assetNode->getChildByName<ui::Button*>("ButtonCancel");
+	btnCancel->setTouchEnabled(true);
+	btnCancel->addClickEventListener([this](Ref* r){
+		this->goToLua();
+		
+		_assetManager->deleteVersion();
+	});
+
+	//设置确定按钮
+	auto btnOk = assetNode->getChildByName<ui::Button*>("ButtonOk");
+	btnOk->addClickEventListener([this, btnCancel](Ref* r){
+		this->startDownload();
+		btnCancel->setTouchEnabled(false);
+	});
+
+	//获得文本和进度条
+	text = assetNode->getChildByName<ui::Text*>("Text");
+	loadingBar = assetNode->getChildByName<ui::LoadingBar*>("LoadingBar");
+
+}
+
+void StartLayer::startDownload(){
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+	text->setText("now start downLoading...");
+#else
+	text->setText("开始下载");
+#endif
 	
+	_assetManager->update();
+
+}
+
+void StartLayer::goToLua(){
+	auto engine = LuaEngine::getInstance();
+	auto address = m_address + "src/main.lua";
+	if (FileUtils::getInstance()->isFileExist(m_address))
+	{
+		engine->executeScriptFile(address.c_str());
+	}
 	
-
-
-
-
-	return true;
 }
