@@ -8,7 +8,7 @@ require "config"
 require "cocos.init"
 
 local function main()
-    local scene = require("app.GameScene.StartScene").new()
+    local scene = require("app.GameScene.MutiplayerScene").new()
 	cc.Director:getInstance():replaceScene(scene)
 end
 
