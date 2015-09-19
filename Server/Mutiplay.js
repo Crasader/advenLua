@@ -8,8 +8,6 @@ console.log('Server on port 3000.');
 
 var fs = require('fs');
 
-
-
 wss.on('connection', function(ws){
 
 	//register to receive message
