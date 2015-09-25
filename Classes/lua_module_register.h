@@ -13,9 +13,18 @@
 #include "physics3d/lua_cocos2dx_physics3d_manual.h"
 #include "navmesh/lua_cocos2dx_navmesh_manual.h"
 
+//include my Class
+#include "LuaBinding/lua_my_class_auto.hpp"
+#include "LuaBinding/lua_BlurAction_auto.hpp"
+
 static int lua_module_register(lua_State* L)
 {
     //Dont' change the module register order unless you know what your are doing
+
+	//binding my Classes
+	register_all_my_class(L);
+	register_all_Blur_Action(L);
+
     register_cocosdenshion_module(L);
     register_network_module(L);
     register_cocosbuilder_module(L);

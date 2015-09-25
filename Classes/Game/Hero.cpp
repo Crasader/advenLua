@@ -15,7 +15,7 @@ Hero* Hero::create(){
 }
 
 bool Hero::init(){
-	_SkeAnimation = SkeletonAnimation::createWithFile("skeleton.json", "skeleton.atlas", 0.8);
+	_SkeAnimation = SkeletonAnimation::createWithFile("res/skeleton.json", "res/skeleton.atlas", 0.8);
 	_SkeAnimation->setMix("idle", "walk", 0.2);
 	_SkeAnimation->setMix("idle", "attack", 0.2);
 	this->setAllEvent();

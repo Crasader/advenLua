@@ -4,6 +4,8 @@
 #include "cocos2d.h"
 #include "lua_module_register.h"
 
+#include "StartLayer.h"
+
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_LINUX)
 #include "ide-support/CodeIDESupport.h"
 #endif
@@ -53,8 +55,22 @@ static int register_all_packages()
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
+
+	auto director = Director::getInstance();
+	auto glview = director->getOpenGLView();
+	if (!glview) {
+		glview = GLViewImpl::create("Adven");
+		director->setOpenGLView(glview);
+	}
+
+
+	director->setOpenGLView(glview);
+
+	director->setDisplayStats(false);
     // set default FPS
     Director::getInstance()->setAnimationInterval(1.0 / 60.0f);
+
+	
 
     // register lua module
     auto engine = LuaEngine::getInstance();
@@ -71,16 +87,22 @@ bool AppDelegate::applicationDidFinishLaunching()
     //LuaStack* stack = engine->getLuaStack();
     //register_custom_function(stack->getLuaState());
 
+	auto scene = StartLayer::createScene();
+
+	director->runWithScene(scene);
+
+
+
 #if (COCOS2D_DEBUG > 0) && (CC_CODE_IDE_DEBUG_SUPPORT > 0)
     // NOTE:Please don't remove this call if you want to debug with Cocos Code IDE
     auto runtimeEngine = RuntimeEngine::getInstance();
     runtimeEngine->addRuntime(RuntimeLuaImpl::create(), kRuntimeEngineLua);
     runtimeEngine->start();
 #else
-    if (engine->executeScriptFile("src/main.lua"))
+   /* if (engine->executeScriptFile("src/main.lua"))
     {
         return false;
-    }
+    }*/
 #endif
 
     return true;

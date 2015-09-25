@@ -151,9 +151,8 @@ void StartLayer::startDownload(){
 void StartLayer::goToLua(){
 	auto engine = LuaEngine::getInstance();
 	auto address = m_address + "src/main.lua";
-	if (FileUtils::getInstance()->isFileExist(m_address))
-	{
-		engine->executeScriptFile(address.c_str());
-	}
+	
+	engine->executeScriptFile(address.c_str());
+	
 	
 }
