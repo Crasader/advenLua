@@ -11,7 +11,6 @@ function StartScene:ctor(  )
 
 	self:addMainCharacter()
 
-
 	self:addPhysicsEvent()
 
 	self:createArmySomeTimeLater()
@@ -19,8 +18,18 @@ function StartScene:ctor(  )
 end
 
 function StartScene:initData(  )
+	--加载敌人出现的速度
+	require "app.Data.ArmySpeed"
+
+	--加载关卡设置
+	require "app.Data.World1"
+
+	--加载敌人生产工厂
+	require("app.models.ArmyFactory")
+
 	self.heroHp_ = 100
 	self.heroScore_ = 0
+
 end
 
 function StartScene:addUI(  )
@@ -52,6 +61,7 @@ function StartScene:addUI(  )
 
 	--add Effect
 	local effect = cc.CSLoader:createNode("Effect/attackEffect.csb")
+	effect:setVisible(false)
 	effect:setScale(2)
 	self:addChild(effect)
 	local effectTimeLine = cc.CSLoader:createTimeline("Effect/attackEffect.csb")
@@ -80,49 +90,78 @@ end
 
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
-	physicsWorld:setGravity(cc.p(0,0))
-	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	physicsWorld:setGravity(cc.p(0,-600))
+	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
 	--添加物理世界框
+
 	local wall = cc.Node:create()
-	wall:setPosition(cc.p(display.cx, display.cy))
-	self:addChild(wall,10)
-	wall:setPhysicsBody(cc.PhysicsBody:createEdgeBox(cc.size(display.width*2,display.height*2)))
+	wall:setPosition(cc.p(display.cx, display.cy +  275/2 ))
+	self:addChild(wall,20)
+	wall:setPhysicsBody(cc.PhysicsBody:createEdgeBox(cc.size(display.width*2,display.height)))
 
 
 	self.hero = require("app.views.Hero").new()
-	self.hero:setPosition(cc.p(display.cx/2, display.cy))
-	self:addChild(self.hero,10)
 	--给英雄设置物理边框
 	self.hero:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(200,275)))
 	--设置碰撞和接触掩码
-	self.hero:getPhysicsBody():setCollisionBitmask(0)
+	-- self.hero:getPhysicsBody():setCollisionBitmask(0)
 	self.hero:getPhysicsBody():setContactTestBitmask(1)
+	--最后才设置位置
+	self.hero:setPosition(cc.p(display.cx/2, 275 ))
 
-
+	self:addChild(self.hero,10)
   	self:createArmy()
 
 	
 end
 
 function StartScene:createArmy(  )
-	local army = require("app/views/Army001").new()
+	if not self:isNeedCreateArmy() then return end
+
+  	local index = self:getIndexOfWorld(self.heroScore_)
+
+	--得到对应应该生成几个怪物
+	local armyNumTbl = World1ArmySetting[index]
+	
+	local armyId = math.random(1, 3)
+	local army = ArmyFactory.createArmyById(armyId)
 	army:setTag(1)
   	army:Walk()
   	army:setScale(1.2)
-  	army:setPosition(cc.p(display.cx*2, display.cy* 2/3))
+  	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
+  	army:setPhysics()
   	self:addChild(army,10)
-  	army:setPhysicsBody(cc.PhysicsBody:createCircle(25))
-  	army:getPhysicsBody():setContactTestBitmask(1)
-  	army:getPhysicsBody():setVelocity(cc.p(-50, 0))
+  	--这里应该根据一个表来设置速度
+  	local speedTbl = self:getSpeedTbl(armyId)
+  	local speed = speedTbl[index]
+  	army:setSpeed(speed)
+end
+
+function StartScene:getSpeedTbl( id )
+	if id == 1 then 
+		return Army001Speed
+	elseif id == 2 then 
+		return Army002Speed
+	elseif id == 3 then 
+		return Army003Speed
+	end
+end
+
+function StartScene:isNeedCreateArmy(  )
+	if self.heroScore_ > World1Setting[#World1Setting] then 
+		return false
+	end
+	return true
+
 end
 
 function StartScene:addPhysicsEvent(  )
 	local function onContactBegan( contact )
 		local spriteA = contact:getShapeA():getBody():getNode()
-		local spriteB = contact:getShapeA():getBody():getNode()
+		local spriteB = contact:getShapeB():getBody():getNode()
 
 		local function showHeroInjure(  )
 			local shineAct = cc.Sequence:create(cc.FadeOut:create(0.2), cc.FadeIn:create(0.15))
@@ -135,12 +174,21 @@ function StartScene:addPhysicsEvent(  )
 			self.heroHpBar:setPercent(self.heroHp_)
 		end
 
+		--如果是两个精灵自己的碰撞就不执行下面逻辑了
+		if spriteA and (spriteA:getTag() == 1 ) and spriteB and (spriteB:getTag() == 1 ) then 
+			return 
+		end 
+
 		if spriteA and (spriteA:getTag() == 1)  then
 			if self.hero:getState() == "ATTACK" then
 				self.effect:setPosition(cc.p(spriteA:getPositionX() -20, spriteA:getPositionY()))
 				self.effectTimeLine:play("Strike", false)
 
-				spriteA:getPhysicsBody():setVelocity(cc.p(200,200))
+				--设置被打飞的速度
+				local index = self:getIndexOfWorld(self.heroScore_)
+				local speed = Army001Speed[index]
+				spriteA:playDefeatEffect()
+				spriteA:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
 				--打击敌人的处理
 				self:defeatArmy()
 
@@ -154,6 +202,7 @@ function StartScene:addPhysicsEvent(  )
 			if self.hero:getState() == "ATTACK" then
 				self.effect:setPosition(cc.p(spriteB:getPositionX() -20, spriteB:getPositionY()))
 				self.effectTimeLine:play("Strike", false)
+				spriteB:playDefeatEffect()
 				spriteB:getPhysicsBody():setVelocity(cc.p(200,200))
 
 				--打击敌人的处理
@@ -163,7 +212,6 @@ function StartScene:addPhysicsEvent(  )
 						cc.RemoveSelf:create(false)))
 			else
 				showHeroInjure()
-				
 			end
 		end
 	end
@@ -184,7 +232,9 @@ function StartScene:createArmySomeTimeLater(  )
 		end
 
 		time = time + deta
-		if time >= 2 then
+		local index = self:getIndexOfWorld(self.heroScore_)
+		local createArmyTime = World1ArmyCreateTime[index]
+		if time >=  createArmyTime then
 			self:createArmy()
 			time = 0
 		end
@@ -200,6 +250,14 @@ end
 function StartScene:defeatArmy(  )
 	self.heroScore_ = self.heroScore_ + 100
 	self:setScore()
+end
+
+function StartScene:getIndexOfWorld( score )
+	for index= 1 , #World1Setting do
+		if score <= World1Setting[index] then 
+			return index
+		end
+	end
 end
 
 return StartScene

@@ -18,6 +18,8 @@ public:
 	virtual void startWithTarget(Node *target) override;
 
 	virtual void update(float time);
+
+	void setShader(std::string name);
 protected:
 
 	BoxfilterAct(){};
@@ -58,6 +60,8 @@ public:
 
 	virtual void update(float time) override;
 
+	void setShader(std::string key);
+
 protected:
 	EdgeFilterAct(){}
 
@@ -88,6 +92,8 @@ public:
 	virtual void startWithTarget(Node *target) override;
 
 	virtual void update(float time) override;
+
+	void setShader(std::string key);
 
 protected:
 	SharpFilterAct(){}

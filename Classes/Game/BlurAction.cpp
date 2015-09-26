@@ -21,10 +21,40 @@ bool BoxfilterAct::init(float time, float from, float to, bool isSke)
 		_to = to;
 		_deltaNumber = _to - _from;
 		_isSke = isSke;
+
+		if (_isSke)
+		{
+			this->setShader("BoxFilterMVP");
+		}
+		else
+		{
+			this->setShader("BoxFilterP");
+		}
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
 		return true;
 	}
 		
 	return false;
+}
+
+void BoxfilterAct::setShader(std::string name)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(name);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+		_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/BoxFilter.frag");
+		else 
+		_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/BoxFilter.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, name);
+	}
+	
 }
 
 BoxfilterAct* BoxfilterAct::clone() const
@@ -47,20 +77,9 @@ void BoxfilterAct::startWithTarget(Node *target)
 {
 	ActionInterval::startWithTarget(target);
 	
-	
 	_num = _from;
-
-	if (_isSke)
-		_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/BoxFilter.frag");
-	else
-		_shader = GLProgram::createWithFilenames("myShader/P_Stand.vert", "myShader/BoxFilter.frag");
-
-	_state = target->getGLProgramState();
-
-	_state->setGLProgram(_shader);
-
+	target->setGLProgramState(_state);
 	_state->setUniformFloat(_shader->getUniformLocationForName("u_number"), _num);
-
 
 }
 
@@ -89,24 +108,47 @@ bool EdgeFilterAct::init(float time, float from, float to, bool isSke)
 		_to = to;
 		_deltaNum = _to - _from;
 		_isSke = isSke;
+
+		if (_isSke)
+		{
+			this->setShader("EdgeFilterMVP");
+		}
+		else
+		{
+			this->setShader("EdgeFilterP");
+		}
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
+
 		return true;
 	}
 	return false;
+}
+
+void EdgeFilterAct::setShader(std::string key)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(key);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+			_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/EdgeFilter.frag");
+		else 
+			_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/EdgeFilter.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, key);
+
+	}
 }
 
 void EdgeFilterAct::startWithTarget(Node *target)
 {
 	ActionInterval::startWithTarget(target);
 	_num = _from;
-
-	if (_isSke)
-	_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/EdgeFilter.frag");
-	else
-	_shader = GLProgram::createWithFilenames("myShader/P_Stand.vert", "myShader/EdgeFilter.frag");
-
-	_state = target->getGLProgramState();
-
-	_state->setGLProgram(_shader);
+	target->setGLProgramState(_state);
 
 	_state->setUniformFloat(_shader->getUniformLocationForName("u_number"), _num);
 
@@ -154,10 +196,38 @@ bool SharpFilterAct::init(float time, float from, float to,bool isSke)
 		_duration = time;
 		_deltaNum = _to - _from;
 		_isSke = isSke;
+
+		//set the shader
+		if (_isSke)
+			this->setShader("SharpFilterMVP");
+		else
+			this->setShader("SharpFilterP");
+			
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
+
 		return true;
 
 	}
 	return false;
+}
+
+void SharpFilterAct::setShader(std::string key)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(key);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+			_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/SharpFilter.frag");
+		else 
+			_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/SharpFilter.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, key);
+	}
 }
 
 void SharpFilterAct::startWithTarget(Node *target)
@@ -166,15 +236,7 @@ void SharpFilterAct::startWithTarget(Node *target)
 
 	_num = _from;
 
-	//set the shader
-	if (_isSke)
-	_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/SharpFilter.frag");
-	else
-	_shader = GLProgram::createWithFilenames("myShader/P_Stand.vert", "myShader/SharpFilter.frag");
-
-	_state = target->getGLProgramState();
-
-	_state->setGLProgram(_shader);
+	target->setGLProgramState(_state);
 
 	_state->setUniformFloat(_shader->getUniformLocationForName("u_number"), _num);
 

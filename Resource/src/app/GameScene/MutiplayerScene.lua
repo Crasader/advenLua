@@ -50,6 +50,7 @@ function MutiplayerScene:addMainObj(  )
 	self.hero = require("app.views.Hero").new()
 	self.hero:setPosition(cc.p(display.cx/2, display.cy))
 	self:addChild(self.hero,10)
+	self.hero:runAction(SharpFilterAct:create( 1.0, 0.0, 0.02, true))
 end
 
 function MutiplayerScene:addTouchEvent(  )

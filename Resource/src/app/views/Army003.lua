@@ -1,35 +1,35 @@
-local Army001 = class("Army001", function ()
-	return cc.CSLoader:createNode("Npc/Npc1001.csb")
+local Army003 = class("Army003", function ()
+	return cc.CSLoader:createNode("Npc/Npc1003.csb")
 end)
 
-function Army001:ctor( )
+function Army003:ctor( )
 	self:initData()
-	self:getChildByName("npc1001"):setFlippedX(true)
-	self.act = cc.CSLoader:createTimeline("Npc/Npc1001.csb")
+	self.body:setFlippedX(true)
+	self.act = cc.CSLoader:createTimeline("Npc/Npc1003.csb")
 	self:runAction(self.act)
 end
 
-function Army001:initData(  )
+function Army003:initData(  )
 	--设置随机数
 	math.randomseed(os.time())
-	self.typeId = 1
+	self.typeId = 3 
 
-	self.body = self:getChildByName("npc1001")
+	self.body = self:getChildByName("Npc1003")
 end
 
-function Army001:Walk(  )
+function Army003:Walk(  )
 	self.act:play("walk", true)
 end
 
-function Army001:Idle(  )
+function Army003:Idle(  )
 	self.act:play("idle", true)
 end
 
-function Army001:Hited(  )
+function Army003:Hited(  )
 	self.act:play("hit", true)
 end
 
-function Army001:playDefeatEffect(  )
+function Army003:playDefeatEffect(  )
 	self:Hited()
 	local function dieEffect(  )
 		local effect = require ("app.Effect.ArmyDieEffect").new()
@@ -40,15 +40,15 @@ function Army001:playDefeatEffect(  )
 	self:runAction(cc.Sequence:create(cc.DelayTime:create(1.5), cc.CallFunc:create(dieEffect) ))
 end
 
-function Army001:setPhysics(  )
+function Army003:setPhysics(  )
 	self:setPhysicsBody(cc.PhysicsBody:createCircle(25))
 	self:getPhysicsBody():setContactTestBitmask(1)
 	self:getPhysicsBody():setRotationEnable(false)
 	self:getPhysicsBody():getShape(0):setFriction(0)
 end
 
-function Army001:setSpeed( speed )
+function Army003:setSpeed( speed )
 	self:getPhysicsBody():setVelocity(cc.p(speed.x, speed.y))
 end
 
-return Army001
+return Army003

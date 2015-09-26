@@ -4,7 +4,6 @@ local Hero = class("Hero", function()
 
 function Hero:ctor()
 
-
 	self:setMix("idle", "attack", 0.2)
 	self:setMix("attack", "idle", 0.2)
 
@@ -21,8 +20,13 @@ function Hero:ctor()
 end
 
 function Hero:init()
+	self:initData()
 	self:addEvent()
 	
+end
+
+function Hero:initData(  )
+	self:setTag(100)
 end
 
 function Hero:addEvent()

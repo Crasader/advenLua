@@ -120,8 +120,6 @@ void StartLayer::addAssetLayer(){
 	btnCancel->setTouchEnabled(true);
 	btnCancel->addClickEventListener([this](Ref* r){
 		this->goToLua();
-		
-		_assetManager->deleteVersion();
 	});
 
 	//设置确定按钮
@@ -151,8 +149,6 @@ void StartLayer::startDownload(){
 void StartLayer::goToLua(){
 	auto engine = LuaEngine::getInstance();
 	auto address = m_address + "src/main.lua";
-	
 	engine->executeScriptFile(address.c_str());
-	
 	
 }
