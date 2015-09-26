@@ -55,22 +55,38 @@ static int register_all_packages()
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
-
+	// initialize director
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
 	if (!glview) {
-		glview = GLViewImpl::create("Adven");
+		glview = GLViewImpl::create("My Game");
+		glview->setFrameSize(1280, 720);
 		director->setOpenGLView(glview);
 	}
 
+	auto size = Director::getInstance()->getVisibleSize();
+	//3：4的机子
+	if (size.width / size.height <= 1.5)
+	{
+		log("3:4");
+		glview->setDesignResolutionSize(960, 640, ResolutionPolicy::FIXED_HEIGHT);
+	}
+	//10:16的机子
+	else{
+		log("10:16");
+		glview->setDesignResolutionSize(1280, 720, ResolutionPolicy::FIXED_HEIGHT);
+	}
 
-	director->setOpenGLView(glview);
+	
+
+		
+	
 
 	director->setDisplayStats(false);
+
     // set default FPS
     Director::getInstance()->setAnimationInterval(1.0 / 60.0f);
 
-	
 
     // register lua module
     auto engine = LuaEngine::getInstance();
@@ -83,15 +99,13 @@ bool AppDelegate::applicationDidFinishLaunching()
     LuaStack* stack = engine->getLuaStack();
     stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
 
+	auto scene = StartLayer::createScene();
+
+	Director::getInstance()->runWithScene(scene);
+
     //register custom function
     //LuaStack* stack = engine->getLuaStack();
     //register_custom_function(stack->getLuaState());
-
-	auto scene = StartLayer::createScene();
-
-	director->runWithScene(scene);
-
-
 
 #if (COCOS2D_DEBUG > 0) && (CC_CODE_IDE_DEBUG_SUPPORT > 0)
     // NOTE:Please don't remove this call if you want to debug with Cocos Code IDE
@@ -99,7 +113,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     runtimeEngine->addRuntime(RuntimeLuaImpl::create(), kRuntimeEngineLua);
     runtimeEngine->start();
 #else
-   /* if (engine->executeScriptFile("src/main.lua"))
+    /*if (engine->executeScriptFile("src/main.lua"))
     {
         return false;
     }*/
