@@ -14,6 +14,8 @@ function LoadingAssetScene:init(  )
 
 	self.title = title
 
+	self.title:setString("小宁最爱大纯^__^")
+
 	require "app.Data.LoadingData"
 
 	local function onNodeEvent(event)
@@ -68,8 +70,11 @@ function LoadingAssetScene:readyIntoGame(  )
 end
 
 function LoadingAssetScene:StartGame(  )
-	local scene = require("app.GameScene.StartScene").new()
-	cc.Director:getInstance():replaceScene(scene)
+	local function goToPlay(  )
+		local scene = require("app.GameScene.StartScene").new()
+		cc.Director:getInstance():replaceScene(scene)
+	end
+	self.title:runAction(cc.Sequence:create( cc.FadeOut:create(1.5), cc.CallFunc:create( goToPlay )) )
 end
 
 

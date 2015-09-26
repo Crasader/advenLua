@@ -90,8 +90,8 @@ end
 
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
-	physicsWorld:setGravity(cc.p(0,-600))
-	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	physicsWorld:setGravity(cc.p(0,-500))
+	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
@@ -169,7 +169,8 @@ function StartScene:addPhysicsEvent(  )
 			self.heroHp_ = self.heroHp_ - 10
 			if self.heroHp_ <= 0 then
 				--游戏结束
-				cc.Director:getInstance():endToLua()
+				local scene = require("app.GameScene.LoadingAssetScene").new()
+				cc.Director:getInstance():replaceScene(scene)
 			end
 			self.heroHpBar:setPercent(self.heroHp_)
 		end
