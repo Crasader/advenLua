@@ -8,7 +8,7 @@ require "config"
 require "cocos.init"
 
 local function main()
-    local scene = require("app.GameScene.LoadingAssetScene").new()
+    local scene = require("app.GameScene.GameOverScene").new()
 	cc.Director:getInstance():replaceScene(scene)
 end
 

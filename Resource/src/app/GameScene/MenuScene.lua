@@ -33,10 +33,9 @@ end
 
 function MenuScene:showNamePanel(  )
 	local panel = require("app.Panel.NamePanel").new()
-	panel:setOpacity(0)
-	panel:setPosition(cc.p(display.cx/2, display.cy))
+	panel:setPosition(cc.p(display.cx/2, display.cy * 2))
 	self:addChild(panel)
-	panel:runAction(cc.FadeIn:create(1))
+	panel:runAction(cc.MoveBy:create( 0.3, cc.p( 0,  - display.cy)))
 
 	--监听事件,保存人物名字
 	local textField = panel:getChildByName("TextField")
@@ -54,7 +53,7 @@ function MenuScene:showNamePanel(  )
 				self:showDifferentSelect()	
 			end
 
-			textField:runAction(cc.Sequence:create(cc.FadeOut:create(1), cc.CallFunc:create( goToNext ) ))
+			panel:runAction(cc.Sequence:create(cc.MoveBy:create( 0.2, cc.p(0, display.cy)), cc.CallFunc:create( goToNext ) ))
 		end
 	end
 	btn:addTouchEventListener( onTouch )
@@ -64,7 +63,8 @@ function MenuScene:showDifferentSelect(  )
 	self:removeAllChildren()
 
 	local panel = require("app.Panel.DiffcultPanel").new()
-	panel:setPosition(cc.p(display.cx/2, display.cy))
+	panel:setPosition(cc.p(display.cx/2, display.cy * 2))
+	panel:runAction(cc.MoveBy:create(0.3,  cc.p(0, -display.cy)))
 	self:addChild(panel)
 end
 

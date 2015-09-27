@@ -15,7 +15,12 @@ function DiffcultPanel:ctor(  )
 		local function onTouch( sender, eventType )
 			if eventType ~= ccui.TouchEventType.ended then return end
 			cc.UserDefault:getInstance():setIntegerForKey("Diffcuity", value)
-			self:getToStart()
+
+			local function GoToNext(  )
+				self:getToStart()
+				
+			end
+			self:runAction(cc.Sequence:create(cc.MoveBy:create(0.2, cc.p(0, display.cy)), cc.CallFunc:create(GoToNext)))
 			
 		end
 

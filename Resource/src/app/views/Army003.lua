@@ -50,7 +50,7 @@ function Army003:playDefeatEffect(  )
 		effect:playEffect()
 	end
 
-	self:runAction(cc.Sequence:create(cc.DelayTime:create(1.5), cc.CallFunc:create(dieEffect) ))
+	self:runAction(cc.Sequence:create(cc.DelayTime:create(0.4), cc.CallFunc:create(dieEffect) ))
 end
 
 function Army003:playHitSound()

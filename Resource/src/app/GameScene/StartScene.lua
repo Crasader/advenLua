@@ -7,6 +7,16 @@ function StartScene:ctor(  )
 
 	self:initData()
 
+	local function onNodeEvent(event)
+	    if event == "enter" then
+	        self:onEnter()
+	    end
+  	end
+
+  	self:registerScriptHandler(onNodeEvent)
+end
+
+function StartScene:onEnter(  )
 	self:playBgSound()
 
 	self:addUI()
@@ -16,7 +26,6 @@ function StartScene:ctor(  )
 	self:addPhysicsEvent()
 
 	self:createArmySomeTimeLater()
-
 end
 
 function StartScene:initData(  )
@@ -31,6 +40,11 @@ function StartScene:initData(  )
 
 	self.heroHp_ = 100
 	self.heroScore_ = 0
+
+	--获得难度选择
+	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
+
+	self.diffculty = diffculty
 
 end
 
@@ -150,10 +164,8 @@ function StartScene:createArmy(  )
 	if not self:isNeedCreateArmy() then return end
 
   	local index = self:getIndexOfWorld(self.heroScore_)
-
-	--得到对应应该生成几个怪物
-	local armyNumTbl = World1ArmySetting[index]
 	
+	--随机生成怪物
 	local armyId = math.random(1, 3)
 	local army = ArmyFactory.createArmyById(armyId)
 	army:setTag(1)
@@ -178,9 +190,9 @@ function StartScene:getSpeedTbl( id )
 end
 
 function StartScene:isNeedCreateArmy(  )
-	if self.heroScore_ > World1Setting[#World1Setting] then 
-		return false
-	end
+	-- if self.heroScore_ > World1Setting[#World1Setting] then 
+	-- 	return false
+	-- end
 	return true
 
 end
@@ -196,7 +208,6 @@ function StartScene:addPhysicsEvent(  )
 			self.heroHp_ = self.heroHp_ - 10
 			if self.heroHp_ <= 0 then
 				--停止缓慢低地弹出游戏
-					
 				self:EnterGameOverScene()	
 
 			end
@@ -221,7 +232,7 @@ function StartScene:addPhysicsEvent(  )
 				self:defeatArmy()
 				spriteA:playDefeatEffect()
 
-				spriteA:runAction(cc.Sequence:create(cc.RotateBy:create(2, 720),
+				spriteA:runAction(cc.Sequence:create(cc.Spawn:create( cc.RotateBy:create(1, 720),cc.ScaleBy:create(1, 0.5)),
 					cc.RemoveSelf:create(false)))
 			else
 				showHeroInjure()
@@ -262,7 +273,8 @@ function StartScene:createArmySomeTimeLater(  )
 
 		time = time + deta
 		local index = self:getIndexOfWorld(self.heroScore_)
-		local createArmyTime = World1ArmyCreateTime[index]
+		--获得创建敌人的时间
+		local createArmyTime = self:getArmyCreateTime(index)
 		if time >=  createArmyTime then
 			self:createArmy()
 			time = 0
@@ -272,6 +284,18 @@ function StartScene:createArmySomeTimeLater(  )
 	self.numUpdate = update
 
 	self:scheduleUpdateWithPriorityLua(update, 0)
+end
+
+function StartScene:getArmyCreateTime( index )
+	--这里可以根据难度不同敌人创建的时间也不同
+	local diffculty = self.diffculty
+	if diffculty == 1 then 
+		return World1ArmyCreateTimeEasy[index]
+	elseif diffculty == 2 then 
+		return World1ArmyCreateTimeNormal[index]
+	elseif diffculty == 3 then 
+		return World1ArmyCreateTimeHard[index]
+	end
 end
 
 function StartScene:setScore(  )
@@ -284,11 +308,50 @@ function StartScene:defeatArmy(  )
 end
 
 function StartScene:getIndexOfWorld( score )
-	for index= 1 , #World1Setting do
-		if score <= World1Setting[index] then 
-			return index
+	local worldSeting = self:getWorldSetting()
+	local diffculty = self.diffculty
+	local lengthOfSetting =  #worldSeting
+	for index= 1 , lengthOfSetting do
+		if score <= worldSeting[index] then 
+			if diffculty == 1 then 
+
+				return index
+
+			elseif diffculty == 2 then 
+				local lastIndex = index + 2
+				--如果未到最后就返回这个
+				if lastIndex <= lengthOfSetting then 
+					return lastIndex
+				else return lengthOfSetting
+				end
+			elseif diffculty == 3 then 
+				local lastIndex = index + 5
+				if lastIndex <= lengthOfSetting then 
+					return lastIndex
+				else return lengthOfSetting
+				end
+			end
+
+		else 
+			return lengthOfSetting
 		end
 	end
+end
+
+function StartScene:getWorldSetting(  )
+	local diffculty = self.diffculty
+	--对应简单难度
+	if diffculty == 1 then 
+
+	--对应普通难度
+	elseif diffculty == 2 then 
+
+	--对应困难难度
+	elseif diffculty == 3 then 
+
+	end 
+
+	return World1Setting
 end
 
 function StartScene:playBgSound(  )

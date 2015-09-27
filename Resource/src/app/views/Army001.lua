@@ -49,7 +49,7 @@ function Army001:playDefeatEffect(  )
 		effect:playEffect()
 	end
 
-	local act = cc.Sequence:create(cc.DelayTime:create(1.5), cc.CallFunc:create(dieEffect) )
+	local act = cc.Sequence:create(cc.DelayTime:create(0.4), cc.CallFunc:create(dieEffect) )
 	self:runAction(act)
 end
 
