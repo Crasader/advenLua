@@ -42,10 +42,51 @@ end
 function GameOverScene:showRank(  )
 	if not self.rankPanel then 
 		local panel = require("app.Panel.RankPanel").new()
+		panel:retain()
 		panel:setPosition(cc.p(display.cx/2, display.cy  ))
 		self.Layer:addChild(panel)
 		self.rankPanel = panel
+		-- self:connectTheSocket()
 	end
+end
+
+function GameOverScene:connectTheSocket(  )
+	local saveMgr = cc.UserDefault:getInstance()
+	local score  = saveMgr:getIntegerForKey("Score", 0)
+	local name = saveMgr:getStringForKey("Name", "AAA")
+
+	--生成json字符串
+	local tbl = {["Name"] = name, ["Score"] = score}
+	local json = require("json")
+	local str = json.encode(tbl)
+	print(str)
+	print("RankPanel:createConnect~~~~~~~~~~~")
+	--创建socket连接
+	local wsScocket =  cc.WebSocket:create("ws://112.74.214.142:4000")
+	self.wsSocket = wsScocket
+	local function wsOpen( strData )
+		print("socket open")
+		if cc.WEBSOCKET_STATE_OPEN == wsScocket:getReadyState() then
+			self.wsSocket:sendString(str);
+		end
+	end
+
+	local function wsMessage( strData )
+		print("socket message"..strData)
+	end
+
+	local function wsClose( StrData )
+		print("socket Close")
+	end
+
+	local function wsError( strData )
+		print("socket Error")
+	end
+
+	wsScocket:registerScriptHandler(wsOpen,cc.WEBSOCKET_OPEN)
+    wsScocket:registerScriptHandler(wsMessage,cc.WEBSOCKET_MESSAGE)
+    wsScocket:registerScriptHandler(wsClose,cc.WEBSOCKET_CLOSE)
+    wsScocket:registerScriptHandler(wsError,cc.WEBSOCKET_ERROR)
 end
 
 return GameOverScene

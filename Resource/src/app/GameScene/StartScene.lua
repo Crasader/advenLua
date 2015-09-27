@@ -133,7 +133,7 @@ end
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
 	physicsWorld:setGravity(cc.p(0,-300))
-	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
