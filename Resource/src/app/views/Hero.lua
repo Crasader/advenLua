@@ -69,6 +69,7 @@ end
 
 function Hero:Attack()
 	if self.state_ ~= "ATTACK" then
+		self:playAttackSound()
 		self:setAnimation(0, "attack", false)
 		self.state_ = "ATTACK"
 	end
@@ -82,6 +83,10 @@ end
 
 function Hero:getState(  )
 	return self.state_
+end
+
+function Hero:playAttackSound(  )
+ 	AudioEngine.playEffect( "music/effect/hero_attack.mp3" )
 end
 
 

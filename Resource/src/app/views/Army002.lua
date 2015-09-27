@@ -32,6 +32,7 @@ end
 
 function Army002:playDefeatEffect(  )
 	self:Hited()
+	self:playHitSound()
 	local function dieEffect(  )
 		local effect = require ("app.Effect.ArmyDieEffect").new()
 		self:addChild(effect)
@@ -39,6 +40,10 @@ function Army002:playDefeatEffect(  )
 	end
 
 	self:runAction(cc.Sequence:create(cc.DelayTime:create(1.5), cc.CallFunc:create(dieEffect) ))
+end
+
+function Army002:playHitSound(  )
+	AudioEngine.playEffect("music/effect/monster_damage.mp3", false)
 end
 
 function Army002:setPhysics(  )

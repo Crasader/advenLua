@@ -26,3 +26,15 @@ shaderFile = {
 	["BoxFilterMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
 	["BoxFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
 }
+
+--背景音乐
+MusicFile = {
+	["World1"] = "music/bg/World1.mp3",
+}
+
+--音效
+EffectFile = {
+	[1] = "music/effect/monster_damage.mp3",
+	[2] = "music/effect/monster_die_fire.mp3",
+	[3] = "music/effect/hero_attack.mp3",
+}

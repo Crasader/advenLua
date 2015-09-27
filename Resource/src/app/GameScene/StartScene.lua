@@ -7,6 +7,8 @@ function StartScene:ctor(  )
 
 	self:initData()
 
+	self:playBgSound()
+
 	self:addUI()
 
 	self:addMainCharacter()
@@ -169,7 +171,7 @@ function StartScene:addPhysicsEvent(  )
 			self.heroHp_ = self.heroHp_ - 10
 			if self.heroHp_ <= 0 then
 				--游戏结束
-				local scene = require("app.GameScene.LoadingAssetScene").new()
+				local scene = require("app.GameScene.GameOverScene").new()
 				cc.Director:getInstance():replaceScene(scene)
 			end
 			self.heroHpBar:setPercent(self.heroHp_)
@@ -188,10 +190,10 @@ function StartScene:addPhysicsEvent(  )
 				--设置被打飞的速度
 				local index = self:getIndexOfWorld(self.heroScore_)
 				local speed = Army001Speed[index]
-				spriteA:playDefeatEffect()
 				spriteA:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
 				--打击敌人的处理
 				self:defeatArmy()
+				spriteA:playDefeatEffect()
 
 				spriteA:runAction(cc.Sequence:create(cc.RotateBy:create(2, 720),
 					cc.RemoveSelf:create(false)))
@@ -259,6 +261,10 @@ function StartScene:getIndexOfWorld( score )
 			return index
 		end
 	end
+end
+
+function StartScene:playBgSound(  )
+	AudioEngine.playEffect("music/bg/World1.mp3", true)
 end
 
 return StartScene

@@ -29,7 +29,6 @@ function LoadingAssetScene:init(  )
 end
 
 function LoadingAssetScene:onEnter(  )
-	print("loadingAsset~~~~~~~~")
 	self:readyIntoGame()
 end
 
@@ -55,6 +54,20 @@ function LoadingAssetScene:loadingAsset(  )
 			if shader then 
 				cc.GLProgramCache:getInstance():addGLProgram(shader, key)
 			end
+		end
+	end
+
+	--载入音乐
+	if MusicFile then 
+		for key , value in pairs (MusicFile) do
+			AudioEngine.preloadMusic(value)
+		end
+	end
+
+	--载入音效
+	if EffectFile then 
+		for c,v in pairs (EffectFile) do
+			AudioEngine.preloadEffect(value)
 		end
 	end
 
