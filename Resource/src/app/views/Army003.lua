@@ -7,6 +7,18 @@ function Army003:ctor( )
 	self.body:setFlippedX(true)
 	self.act = cc.CSLoader:createTimeline("Npc/Npc1003.csb")
 	self:runAction(self.act)
+
+	--设置怪物的大小
+	local height = display.height
+	local width = display.width
+	local scaleFacX = width / CC_DESIGN_RESOLUTION.width
+	local scaleFacY = height / CC_DESIGN_RESOLUTION.height
+
+	self.scaleFactor = scaleFacX
+	local scaleFactor = 1.5
+	self.body:setScaleX(scaleFacX * scaleFactor)
+	self.body:setScaleY(scaleFacY* scaleFactor)
+
 end
 
 function Army003:initData(  )
@@ -41,11 +53,12 @@ function Army003:playDefeatEffect(  )
 	self:runAction(cc.Sequence:create(cc.DelayTime:create(1.5), cc.CallFunc:create(dieEffect) ))
 end
 
-function Army003:playHitSound(  )
+function Army003:playHitSound()
 	AudioEngine.playEffect("music/effect/monster_damage.mp3", false)
 end
-function Army003:setPhysics(  )
-	self:setPhysicsBody(cc.PhysicsBody:createCircle(25))
+
+function Army003:setPhysics()
+	self:setPhysicsBody(cc.PhysicsBody:createCircle(30 * self.scaleFactor))
 	self:getPhysicsBody():setContactTestBitmask(1)
 	self:getPhysicsBody():setRotationEnable(false)
 	self:getPhysicsBody():getShape(0):setFriction(0)
