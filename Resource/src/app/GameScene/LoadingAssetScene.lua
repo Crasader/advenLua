@@ -82,7 +82,7 @@ end
 
 function LoadingAssetScene:StartGame(  )
 	local function goToPlay(  )
-		local scene = require("app.GameScene.StartScene").new()
+		local scene = require("app.GameScene.MenuScene").new()
 		cc.Director:getInstance():replaceScene(scene)
 	end
 	self.title:setString("冒险即将开始...")

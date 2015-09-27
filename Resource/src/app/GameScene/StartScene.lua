@@ -48,12 +48,35 @@ function StartScene:addUI(  )
 	backGround:setScaleX(scaleFactorX)
 	self.Layer:addChild(backGround)
 
+	--添加暂停键
+	local btnZT = cc.CSLoader:createNode("MainUI/ZanTingBTN.csb")
+	btnZT:setPosition(cc.p( 25, display.height - 20 ))
+	self.Layer:addChild(btnZT,20)
+
+	self.pauseTag = false
+	--得到按钮并且设置监听
+	local btn = btnZT:getChildByName("Button")
+	local function onTouch( sender, eventType )
+		if eventType ~= ccui.TouchEventType.ended then return end
+		if self.pauseTag == false then 
+			self.pauseTag = true
+			AudioEngine.pauseMusic()
+			cc.Director:getInstance():stopAnimation()
+
+		else
+			self.pauseTag = false
+			cc.Director:getInstance():startAnimation()
+			AudioEngine.resumeMusic()
+		end
+	end
+	btn:addTouchEventListener( onTouch )
+
 	--add Hp
 	local hp = cc.CSLoader:createNode("MainUI/HP.csb")
 
 	self.heroHpBar = hp:getChildByName("HP")
 	self.heroHpBar:setPercent(self.heroHp_)
-	hp:setPosition(cc.p(150, display.height - 20))
+	hp:setPosition(cc.p(170, display.height - 20))
 	self.Layer:addChild(hp,20)
 
 	--add Score
@@ -269,7 +292,7 @@ function StartScene:getIndexOfWorld( score )
 end
 
 function StartScene:playBgSound(  )
-	AudioEngine.playEffect("music/bg/World1.mp3", true)
+	AudioEngine.playMusic("music/bg/World1.mp3", true)
 end
 
 function StartScene:EnterGameOverScene(  )
@@ -278,7 +301,9 @@ function StartScene:EnterGameOverScene(  )
 	self:saveScore()
 
 	--进入到结算场景
-	cc.Director:getInstance():stopAnimation()
+	local scene = require("app.GameScene.GameOverScene").new()
+	local fadeIn = cc.TransitionFade:create(1,scene, cc.c3b(255, 0, 0) )
+	cc.Director:getInstance():replaceScene(fadeIn)
 
 
 end

@@ -7,7 +7,8 @@ plistFile = {
 	[6] = "comon/UI_Common_Common02.plist",
 	[7] = "comon/UI_Monster_common.plist",
 	[8] = "SkillImg/ByStrike01_effect-hd.plist",
-	[9] = "SkillImg/ByStrike04_effect.plist"
+	[9] = "SkillImg/ByStrike04_effect.plist",
+	[10] = "comon/UI_Fight_Common01.plist",
 }
 
 pngFile = {
