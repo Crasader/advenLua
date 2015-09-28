@@ -16,8 +16,8 @@ function Army001:ctor( )
 	--游戏是横屏的有限考虑横屏
 	self.scaleFactor = scaleFacX
 	local scaleFactor = 1.5
-	self.body:setScaleX(scaleFacX  * scaleFactor)
-	self.body:setScaleY(scaleFacY * scaleFactor)
+	self:setScaleX(scaleFacX  * scaleFactor)
+	self:setScaleY(scaleFacY * scaleFactor)
 end
 
 function Army001:initData(  )

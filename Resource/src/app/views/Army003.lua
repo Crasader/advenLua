@@ -16,8 +16,8 @@ function Army003:ctor( )
 
 	self.scaleFactor = scaleFacX
 	local scaleFactor = 1.5
-	self.body:setScaleX(scaleFacX * scaleFactor)
-	self.body:setScaleY(scaleFacY* scaleFactor)
+	self:setScaleX(scaleFacX * scaleFactor)
+	self:setScaleY(scaleFacY* scaleFactor)
 
 end
 

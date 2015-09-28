@@ -40,6 +40,7 @@ function StartScene:initData(  )
 
 	self.heroHp_ = 100
 	self.heroScore_ = 0
+	self.index = 1
 
 	--获得难度选择
 	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
@@ -163,7 +164,7 @@ end
 function StartScene:createArmy(  )
 	if not self:isNeedCreateArmy() then return end
 
-  	local index = self:getIndexOfWorld(self.heroScore_)
+  	-- local index = self:getIndexOfWorld(self.heroScore_)
 	
 	--随机生成怪物
 	local armyId = math.random(1, 3)
@@ -175,7 +176,7 @@ function StartScene:createArmy(  )
   	self.Layer:addChild(army,10)
   	--这里应该根据一个表来设置速度
   	local speedTbl = self:getSpeedTbl(armyId)
-  	local speed = speedTbl[index]
+  	local speed = speedTbl[self.index]
   	army:setSpeed(speed)
 end
 
@@ -226,13 +227,14 @@ function StartScene:addPhysicsEvent(  )
 
 				--设置被打飞的速度
 				local index = self:getIndexOfWorld(self.heroScore_)
-				local speed = Army001Speed[index]
+				self.index  = index 
+				local speed = Army001Speed[self.index]
 				spriteA:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
 				--打击敌人的处理
 				self:defeatArmy()
 				spriteA:playDefeatEffect()
 
-				spriteA:runAction(cc.Sequence:create(cc.Spawn:create( cc.RotateBy:create(1, 720),cc.ScaleBy:create(1, 0.5)),
+				spriteA:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
 					cc.RemoveSelf:create(false)))
 			else
 				showHeroInjure()
@@ -248,7 +250,7 @@ function StartScene:addPhysicsEvent(  )
 				--打击敌人的处理
 				self:defeatArmy()
 
-				spriteB:runAction(cc.Sequence:create(cc.RotateBy:create(2, 720),
+				spriteB:runAction(cc.Sequence:create(cc.RotateBy:create(1, 720),
 						cc.RemoveSelf:create(false)))
 			else
 				showHeroInjure()
@@ -272,9 +274,8 @@ function StartScene:createArmySomeTimeLater(  )
 		end
 
 		time = time + deta
-		local index = self:getIndexOfWorld(self.heroScore_)
 		--获得创建敌人的时间
-		local createArmyTime = self:getArmyCreateTime(index)
+		local createArmyTime = self:getArmyCreateTime(self.index)
 		if time >=  createArmyTime then
 			self:createArmy()
 			time = 0
@@ -310,8 +311,10 @@ end
 function StartScene:getIndexOfWorld( score )
 	local worldSeting = self:getWorldSetting()
 	local diffculty = self.diffculty
+	print("diffculty~~~~~~~~")
+	print(diffculty)
 	local lengthOfSetting =  #worldSeting
-	for index= 1 , lengthOfSetting do
+	for index = 1 , lengthOfSetting do
 		if score <= worldSeting[index] then 
 			if diffculty == 1 then 
 
@@ -322,20 +325,20 @@ function StartScene:getIndexOfWorld( score )
 				--如果未到最后就返回这个
 				if lastIndex <= lengthOfSetting then 
 					return lastIndex
-				else return lengthOfSetting
+				else 
+					return lengthOfSetting
 				end
 			elseif diffculty == 3 then 
 				local lastIndex = index + 5
 				if lastIndex <= lengthOfSetting then 
 					return lastIndex
-				else return lengthOfSetting
+				else 
+					return lengthOfSetting
 				end
 			end
-
-		else 
-			return lengthOfSetting
 		end
 	end
+	return lengthOfSetting
 end
 
 function StartScene:getWorldSetting(  )
