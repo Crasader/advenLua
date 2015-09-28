@@ -7,7 +7,8 @@ plistFile = {
 	[6] = "comon/UI_Common_Common02.plist",
 	[7] = "comon/UI_Monster_common.plist",
 	[8] = "SkillImg/ByStrike01_effect-hd.plist",
-	[9] = "SkillImg/ByStrike04_effect.plist"
+	[9] = "SkillImg/ByStrike04_effect.plist",
+	[10] = "comon/UI_Fight_Common01.plist",
 }
 
 pngFile = {
@@ -25,4 +26,16 @@ shaderFile = {
 	["EdgeFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/EdgeFilter.frag"},
 	["BoxFilterMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
 	["BoxFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
+}
+
+--背景音乐
+MusicFile = {
+	["World1"] = "music/bg/World1.mp3",
+}
+
+--音效
+EffectFile = {
+	[1] = "music/effect/monster_damage.mp3",
+	[2] = "music/effect/monster_die_fire.mp3",
+	[3] = "music/effect/hero_attack.mp3",
 }

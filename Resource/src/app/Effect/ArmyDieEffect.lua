@@ -13,6 +13,11 @@ end
 
 function EffectArmyDie:playEffect(  )
 	self.act:play("explore", false)
+	self:playDieSound()
+end
+
+function EffectArmyDie:playDieSound(  )
+	AudioEngine.playEffect("music/effect/monster_die_fire.mp3", false)
 end
 
 return EffectArmyDie

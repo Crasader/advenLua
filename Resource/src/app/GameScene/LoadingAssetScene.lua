@@ -14,8 +14,6 @@ function LoadingAssetScene:init(  )
 
 	self.title = title
 
-	self.title:setString("小宁最爱大纯^__^")
-
 	require "app.Data.LoadingData"
 
 	local function onNodeEvent(event)
@@ -29,7 +27,6 @@ function LoadingAssetScene:init(  )
 end
 
 function LoadingAssetScene:onEnter(  )
-	print("loadingAsset~~~~~~~~")
 	self:readyIntoGame()
 end
 
@@ -58,6 +55,20 @@ function LoadingAssetScene:loadingAsset(  )
 		end
 	end
 
+	--载入音乐
+	if MusicFile then 
+		for key , value in pairs (MusicFile) do
+			AudioEngine.preloadMusic(value)
+		end
+	end
+
+	--载入音效
+	if EffectFile then 
+		for c,v in pairs (EffectFile) do
+			AudioEngine.preloadEffect(value)
+		end
+	end
+
 	return true
 end
 
@@ -71,9 +82,10 @@ end
 
 function LoadingAssetScene:StartGame(  )
 	local function goToPlay(  )
-		local scene = require("app.GameScene.StartScene").new()
+		local scene = require("app.GameScene.MenuScene").new()
 		cc.Director:getInstance():replaceScene(scene)
 	end
+	self.title:setString("冒险即将开始...")
 	self.title:runAction(cc.Sequence:create( cc.FadeOut:create(1.5), cc.CallFunc:create( goToPlay )) )
 end
 

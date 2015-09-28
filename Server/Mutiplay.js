@@ -8,7 +8,6 @@ console.log('Server on port 3000.');
 
 var fs = require('fs');
 
-<<<<<<< HEAD
 //创建一个对象构造器来构建一个人物对象
 function Person (id) {
 	this.id = id;
@@ -17,11 +16,6 @@ function Person (id) {
 var people = new Array();
 var numOfConnect = 0;
 
-=======
-
-
-wss.on('connection', function(ws){
->>>>>>> origin/master
 
 wss.on('connection', function(ws){
 	//每次连接加1
