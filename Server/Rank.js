@@ -14,21 +14,17 @@ function Person (name, score) {
 	this.Score = score;
 }
 
-var people = new Array(6);
+var peopleScore = new Array(100, 200, 300, 400, 500);
+var peopleName = new Array("CCC", "BBB", "AAA", "DDD", "EEE");
+
 var Score = new Array(6);
 
 //初始化
-for (i = 0; i < people.length; i ++)
+for (i = 0; i < Score.length; i ++)
 {
-	var num = (2000 - i)
 	console.log(num);
-	people[i] = new Person("sadi", num);
-	Score[i] = new Person("sadi", 0);
+	Score[i] = new Person(peopleName[i], peopleScore[i]);
 }
-
-
-var str = JSON.stringify(people)
-console.log(str);
 
 wss.on('connection', function(ws){
 	//获取数据
@@ -59,7 +55,15 @@ wss.on('connection', function(ws){
 
 					if (Score[index].Score <= Score[i].Score)
 					{
+						if (Score[index].Name == Score[i].Name)
+						{
+							
+						}
+						else
+						{
+
 						swap(index, i);
+						}
 					}
 				}
 			}
