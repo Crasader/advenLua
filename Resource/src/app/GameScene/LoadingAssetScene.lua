@@ -74,8 +74,8 @@ end
 
 function LoadingAssetScene:readyIntoGame(  )
 	if self:loadingAsset() then 
-		-- self:StartGame()
-		self:getIntoForChun()
+		self:StartGame()
+		-- self:getIntoForChun()
 	else
 		self:readyIntoGame()
 	end
