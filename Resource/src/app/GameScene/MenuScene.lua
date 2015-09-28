@@ -64,7 +64,8 @@ function MenuScene:showDifferentSelect(  )
 
 	local panel = require("app.Panel.DiffcultPanel").new()
 	panel:setPosition(cc.p(display.cx/2, display.cy * 2))
-	panel:runAction(cc.MoveBy:create(0.3,  cc.p(0, -display.cy)))
+	local size = panel:getContentSize()
+	panel:runAction(cc.MoveBy:create(0.3,  cc.p(0, -display.cy * 2 + size.height )))
 	self:addChild(panel)
 end
 

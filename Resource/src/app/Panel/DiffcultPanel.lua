@@ -3,6 +3,12 @@ local DiffcultPanel = class("DiffcultPanel",function (  )
 end )
 
 function DiffcultPanel:ctor(  )
+	--得到文本框
+	local text = self:getChildByName("Text_1")
+	text:setVisible(false)
+	text:setFontSize(32)
+	text:runAction(cc.MoveBy:create(0.05, cc.p(0, -50)))
+
 	local tbl = {["Button_Easy"] = 1 ,
 			["Button_Normal"] = 2,
 			["Button_Hard"] = 3,
