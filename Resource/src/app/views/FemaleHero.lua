@@ -1,8 +1,8 @@
-local Hero = class("Hero", function()
-	return sp.SkeletonAnimation:create("Spine/maleHero.json", "Spine/maleHero.atlas", 0.8)
+local FemaleHero = class("FemaleHero", function()
+	return sp.SkeletonAnimation:create("Spine/femaleHero.json", "Spine/femaleHero.atlas", 0.8)
 	end)
 
-function Hero:ctor()
+function FemaleHero:ctor()
 
 	self:setMix("idle", "attack", 0.2)
 	self:setMix("attack", "idle", 0.2)
@@ -19,19 +19,17 @@ function Hero:ctor()
   self:registerScriptHandler(onNodeEvent)
 end
 
-function Hero:init()
+function FemaleHero:init()
 	self:initData()
 	self:addEvent()
 	
 end
 
-function Hero:initData(  )
+function FemaleHero:initData(  )
 	self:setTag(100)
-
-	self:setPosition(cc.p(display.cx/2, 275 ))
-
+	self:setPosition(cc.p(display.cx/2, 225 ))
 	--给英雄设置物理边框
-	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(200,275)))
+	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(175,175)))
 	--设置碰撞和接触掩码
 	-- self.hero:getPhysicsBody():setCollisionBitmask(0)
 	self:getPhysicsBody():setContactTestBitmask(1)
@@ -39,7 +37,7 @@ function Hero:initData(  )
 
 end
 
-function Hero:addEvent()
+function FemaleHero:addEvent()
 	local eventDispatcher_ = cc.Director:getInstance():getEventDispatcher()
 
 	--注册刚开始播放动画的监听器
@@ -58,7 +56,7 @@ function Hero:addEvent()
 
 end
 
-function Hero:setAnimationEvent(event)
+function FemaleHero:setAnimationEvent(event)
 		 print(string.format("[spine] %d event: %s, %d, %f, %s", 
                               event.trackIndex,
                               event.eventData.name,
@@ -72,12 +70,12 @@ function Hero:setAnimationEvent(event)
 		end
 end
 
-function Hero:dealTouch()
+function FemaleHero:dealTouch()
 	self:Attack()
 	return true
 end
 
-function Hero:Attack()
+function FemaleHero:Attack()
 	if self.state_ ~= "ATTACK" then
 		self:playAttackSound()
 		self:setAnimation(0, "attack", false)
@@ -86,18 +84,18 @@ function Hero:Attack()
 	
 end
 
-function Hero:Idle()
+function FemaleHero:Idle()
 	self:setAnimation(0, "idle", true)
 	self.state_ = "IDLE"
 end
 
-function Hero:getState(  )
+function FemaleHero:getState(  )
 	return self.state_
 end
 
-function Hero:playAttackSound(  )
- 	AudioEngine.playEffect( "music/effect/hero_attack.mp3" )
+function FemaleHero:playAttackSound(  )
+ 	AudioEngine.playEffect( "music/effect/FemaleHero_attack.mp3" )
 end
 
 
-return Hero
+return FemaleHero

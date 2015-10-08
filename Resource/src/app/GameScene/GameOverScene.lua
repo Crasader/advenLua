@@ -6,6 +6,7 @@ function GameOverScene:ctor(  )
 	local layer = cc.LayerColor:create( cc.c4b(255, 255, 255, 255))
 	self:addChild(layer)
 	self.Layer = layer 
+	self:initData()
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
@@ -14,6 +15,10 @@ function GameOverScene:ctor(  )
 
   	self:registerScriptHandler(onNodeEvent)
 
+end
+
+function GameOverScene:initData(  )
+	
 end
 
 function GameOverScene:onEnter(  )
@@ -58,9 +63,9 @@ function GameOverScene:connectTheSocket(  )
 	--生成json字符串
 	local tbl = {["Name"] = name, ["Score"] = score}
 	local json = require("json")
+	--获得带难度的字符串
 	local str = json.encode(tbl)
-	print(str)
-	print("RankPanel:createConnect~~~~~~~~~~~")
+
 	--创建socket连接
 	local wsScocket =  cc.WebSocket:create("ws://112.74.214.142:4000")
 	self.wsSocket = wsScocket

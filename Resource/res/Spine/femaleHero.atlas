@@ -1,0 +1,117 @@
+
+femaleHero.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+hero_12_body
+  rotate: false
+  xy: 171, 64
+  size: 67, 90
+  orig: 67, 90
+  offset: 0, 0
+  index: -1
+hero_12_hair
+  rotate: false
+  xy: 2, 5
+  size: 167, 149
+  orig: 167, 149
+  offset: 0, 0
+  index: -1
+hero_12_hair_2
+  rotate: false
+  xy: 296, 82
+  size: 199, 172
+  orig: 199, 172
+  offset: 0, 0
+  index: -1
+hero_12_hair_3
+  rotate: false
+  xy: 234, 2
+  size: 52, 48
+  orig: 52, 48
+  offset: 0, 0
+  index: -1
+hero_12_l_arm_2
+  rotate: true
+  xy: 335, 6
+  size: 27, 44
+  orig: 27, 44
+  offset: 0, 0
+  index: -1
+hero_12_l_foot_1
+  rotate: false
+  xy: 470, 23
+  size: 10, 12
+  orig: 10, 12
+  offset: 0, 0
+  index: -1
+hero_12_l_hand
+  rotate: false
+  xy: 335, 35
+  size: 52, 45
+  orig: 52, 45
+  offset: 0, 0
+  index: -1
+hero_12_l_lag_1
+  rotate: true
+  xy: 171, 15
+  size: 47, 61
+  orig: 47, 61
+  offset: 0, 0
+  index: -1
+hero_12_l_lag_2
+  rotate: false
+  xy: 434, 2
+  size: 34, 33
+  orig: 34, 34
+  offset: 0, 0
+  index: -1
+hero_12_r_arm_2
+  rotate: true
+  xy: 389, 6
+  size: 35, 43
+  orig: 35, 43
+  offset: 0, 0
+  index: -1
+hero_12_r_foot_1
+  rotate: false
+  xy: 497, 240
+  size: 10, 14
+  orig: 10, 14
+  offset: 0, 0
+  index: -1
+hero_12_r_hand
+  rotate: true
+  xy: 2, 156
+  size: 98, 292
+  orig: 98, 292
+  offset: 0, 0
+  index: -1
+hero_12_r_lag_1
+  rotate: false
+  xy: 288, 11
+  size: 45, 69
+  orig: 45, 69
+  offset: 0, 0
+  index: -1
+hero_12_r_lag_2
+  rotate: true
+  xy: 389, 43
+  size: 37, 54
+  orig: 37, 54
+  offset: 0, 0
+  index: -1
+hero_12_r_skirt
+  rotate: true
+  xy: 240, 52
+  size: 102, 45
+  orig: 102, 45
+  offset: 0, 0
+  index: -1
+hero_12_star
+  rotate: false
+  xy: 445, 37
+  size: 45, 43
+  orig: 45, 43
+  offset: 0, 0
+  index: -1

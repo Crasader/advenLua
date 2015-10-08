@@ -20,14 +20,17 @@ var peopleName = new Array("CCC", "BBB", "AAA", "DDD", "EEE", "FFF");
 
 //这个时候读取文件
 // var fileStr = fs.readFileSync("./")
-var str = fs.readFileSync("./Score.json");
-var Score = JSON.parse(str)
+str = fs.readFileSync("./ScoreEasy.json");
+var ScoreEasy = JSON.parse(str)
 
-console.log("the Score is :");
-for (var i = Score.length - 1; i >= 0; i--) {
-	console.log(Score[i]);
-};
+str = fs.readFileSync("./ScoreNormal.json");
+var ScoreNormal = JSON.parse(str)
 
+star = fs.readFileSync("./ScoreHard.json");
+var ScoreHard = JSON.parse(str);
+
+//一个指向成绩的指针
+var Score
 wss.on('connection', function(ws)
 {
 	//获取数据
@@ -97,19 +100,61 @@ wss.on('connection', function(ws)
 
 		}
 		//将data解析成对象
-		var GameScore = JSON.parse(data);
+		//data的格式是000x{json}，前面四个是难度值
+		var gameStr = data.slice(4,data.length)
+
+		//获得难度值
+		var diffculty = parseInt(data.slice(3,4))
+		console.log("diffculty is :");
+		console.log(diffculty);
+		//根据难度让Score指针指向不同的数组
+		switch(diffculty)
+		{
+
+			case 1 :
+				Score = ScoreEasy;
+				break;
+			case 2 :
+				Score = ScoreNormal;
+				break;
+			case 3 :
+				Score = ScoreHard;
+				break;
+			default:
+				Score = ScoreEasy;
+				break;
+		}
+		var GameScore = JSON.parse(gameStr);
 		
 		var needSort = isNeedSort(GameScore);
 		//是新的才进行排序,而且分数比较高的
-		str = JSON.stringify(Score);
 		sortAll(GameScore);
 		
 		//否则可能是老的，但是分数可能比较高的
+		//根据难度选择解析的时间
 		str = JSON.stringify(Score);
 
 		ws.send(str);
 
 		//保存数据
-		fs.writeFileSync("./Score.json", str);
+		//根据难度保存数据
+		switch(diffculty)
+		{
+
+			case 1 :
+				fs.writeFileSync("./ScoreEasy.json", str);
+				break;
+			case 2 :
+				fs.writeFileSync("./ScoreNormal.json", str);
+
+				break;
+			case 3 :
+				fs.writeFileSync("./ScoreHard.json", str);
+
+				break;
+			default:
+				break;
+		}
+
 	});
 });

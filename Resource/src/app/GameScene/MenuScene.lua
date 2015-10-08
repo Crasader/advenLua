@@ -57,6 +57,7 @@ function MenuScene:showNamePanel(  )
 		end
 	end
 	btn:addTouchEventListener( onTouch )
+
 end
 
 function MenuScene:showDifferentSelect(  )

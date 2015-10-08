@@ -5,10 +5,6 @@ end )
 function DiffcultPanel:ctor(  )
 	--得到文本框
 	local text = self:getChildByName("Text_1")
-	text:setVisible(false)
-	text:setFontSize(32)
-	text:runAction(cc.MoveBy:create(0.05, cc.p(0, -50)))
-
 	local tbl = {["Button_Easy"] = 1 ,
 			["Button_Normal"] = 2,
 			["Button_Hard"] = 3,
@@ -35,8 +31,15 @@ function DiffcultPanel:ctor(  )
 end
 
 function DiffcultPanel:getToStart(  )
-	local scene  = require("app/GameScene/StartScene").new()
-	cc.Director:getInstance():replaceScene(scene)
+	local panel = require("app.Panel.SelectRolePanel").new()
+
+	panel:setPosition(cc.p(display.cx/2, display.cy * 2 ))
+	local size = panel:getContentSize()
+	panel:runAction(cc.MoveBy:create(0.3,  cc.p(0, -display.cy * 2 + size.height )))
+	self:getParent():addChild(panel)
+
 end
+
+
 
 return DiffcultPanel
