@@ -7,6 +7,7 @@ function StartScene:ctor(  )
 
 	self:initData()
 
+
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
@@ -26,18 +27,98 @@ function StartScene:onEnter(  )
 	self:addPhysicsEvent()
 
 	self:createArmySomeTimeLater()
+
+	self:createGameCutScene()
+
+	self:addEvent()
+	
+end
+
+function StartScene:createGameCutScene()
+	self.gamecutScene = require("app.GameScene.GameCutScene").new()
+	self.gamecutScene:retain()
+end
+
+function StartScene:DealWithBossShoot(  )
+	--创建子弹
+	local bullet = EffectFactory.createBossFire()
+	self.Layer:addChild(bullet)
+	bullet:setPosition(display.width, display.cy)
+	bullet:setSpeed({x= -500, y= 0})
+	bullet:Fire()
+	-- bullet:runAction(cc.Spawn:create( cc.ScaleBy:create(2, 2), cc.MoveBy:create(2, cc.p(-display.width/2, 0)) ))
+end
+
+function StartScene:addEvent(  )
+
+	--boss射击子弹事件
+	local bossEventLis = cc.EventListenerCustom:create( EventConst.BOSS_SHOOT, handler(self, self.DealWithBossShoot) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(bossEventLis, self)
+
+	--boss死亡后的事件
+	local bossDieEvent = cc.EventListenerCustom:create( EventConst.BOSS01_DIE, handler(self, self.DealWithBossDie) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(bossDieEvent, self)
+
+	--主角死亡后的事件
+	local heroDieEvent = cc.EventListenerCustom:create( EventConst.HERO_DIE, handler(self, self.DealWithHeroDie) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(heroDieEvent, self)
+
+
+	--暂停事件
+	local gamecutEvent = cc.EventListenerCustom:create( EventConst.GAME_CUT, handler(self, self.DealWithGamecut) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(gamecutEvent, self)
+
+	--resume事件
+	local gameResumeEvent = cc.EventListenerCustom:create( EventConst.GAME_RESUME, handler(self, self.DealWithResume) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(gameResumeEvent, self)
+end
+
+function StartScene:DealWithResume()
+	AudioEngine.resumeMusic()
+	cc.Director:getInstance():startAnimation()
+end
+
+function StartScene:DealWithGamecut(  )
+	if self.gamecutScene then 
+		AudioEngine.pauseMusic()
+		cc.Director:getInstance():stopAnimation()
+		local scene = self.gamecutScene
+
+		local rendTex = self.rendTex
+		if not rendTex then 
+			rendTex = cc.RenderTexture:create(display.width, display.height)
+			rendTex:retain()
+			self.rendTex = rendTex
+		end
+
+		rendTex:beginWithClear(0, 0, 0, 1.0)
+
+		self.Layer:visit()
+
+		rendTex:endToLua()
+
+		scene:initWithTexture(rendTex:getSprite():getTexture())
+
+		cc.Director:getInstance():pushScene(scene)
+		scene:toGuass()
+		
+	end
+end
+
+function StartScene:DealWithBossDie()
+	self:EnterGameOverScene( true )	
+end
+
+function StartScene:DealWithHeroDie()
+	self:EnterGameOverScene( false )	
 end
 
 function StartScene:initData(  )
-	--加载敌人出现的速度
-	require "app.Data.ArmySpeed"
-
-	--加载关卡设置
-	require "app.Data.World1"
-
-	--加载敌人生产工厂
-	require("app.models.ArmyFactory")
-
 	self.heroHp_ = 100
 	self.heroScore_ = 0
 	self.index = 1
@@ -52,7 +133,6 @@ function StartScene:initData(  )
 	local heroID = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
 
 	self.heroId = heroID
-
 end
 
 function StartScene:addUI(  )
@@ -61,13 +141,16 @@ function StartScene:addUI(  )
 	self:addChild(layer)
 	self.Layer = layer
 	--add Back
-	local backGround = cc.CSLoader:createNode("Level/Level1.csb")
+	local backGround = LevelFactory.createLavel1()
 	backGround:setPosition(cc.p(0, 0))
-	local scaleFactorY = size.height / backGround:getContentSize().height
-	backGround:setScaleY(scaleFactorY)
-	local scaleFactorX = size.width / backGround:getContentSize().width
-	backGround:setScaleX(scaleFactorX)
+	local nextBg = LevelFactory.createLavel1()
+	nextBg:setPosition(cc.p(display.width, 0))
+	nextBg:setRotation3D(cc.vec3(0,60,0))
+	local lastBg = LevelFactory.createLavel1()
+	backGround:setPosition(cc.p(2*display.width - 1, 0))
 	self.Layer:addChild(backGround)
+	self.Layer:addChild(nextBg)
+	self.Layer:addChild(lastBg)
 
 	--添加暂停键
 	local btnZT = cc.CSLoader:createNode("MainUI/ZanTingBTN.csb")
@@ -80,19 +163,8 @@ function StartScene:addUI(  )
 	local btn = btnZT:getChildByName("Button")
 	local function onTouch( sender, eventType )
 		if eventType ~= ccui.TouchEventType.ended then return end
-		if self.pauseTag == false then 
-			self.pauseTag = true
-			AudioEngine.pauseMusic()
-			local layer = cc.LayerColor:create(cc.c4b(0, 0, 0, 150))
-			self:addChild(layer, 100, 100)
-			cc.Director:getInstance():stopAnimation()
-
-		else
-			self.pauseTag = false
-			self:getChildByTag(100):removeFromParent()
-			cc.Director:getInstance():startAnimation()
-			AudioEngine.resumeMusic()
-		end
+		local event = cc.EventCustom:new(EventConst.GAME_CUT)
+		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
 	end
 	btn:addTouchEventListener( onTouch )
 
@@ -173,30 +245,13 @@ function StartScene:createHeroById( id )
 end
 
 function StartScene:createArmy(  )
-	if not self:isNeedCreateArmy() then 
-		--如果不需要创造敌人就取消计时器来创造敌人
-		self:unScheduleCreateArmy()
-
-		--然后创建boss
-		if not self.boss then 
-			local boss = self:createBoss()
-		  	boss:Walk()
-		  	boss:setPosition(cc.p(display.cx* 2.5, 275/2+ 180))
-		  	boss:setPhysics()
-		  	self.Layer:addChild(boss,10)
-		  	self.boss = boss
-		  	--这里应该根据一个表来设置速度
-			return 
-		end
-	end
-
   	-- local index = self:getIndexOfWorld(self.heroScore_)
 	
 	--随机生成怪物
 	local armyId = math.random(1, 3)
 	local army = ArmyFactory.createArmyById(armyId)
 	self.armyNum = self.armyNum + 1
-	army:setTag(1)
+	army:setTag(const.NORMAL_ARMY)
   	army:Walk()
   	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
   	army:setPhysics()
@@ -208,12 +263,15 @@ function StartScene:createArmy(  )
 end
 
 function StartScene:createBoss(  )
-	local boss = require("app.views.Boss001").new()
-	return boss
-end
-
-function StartScene:unScheduleCreateArmy(  )
-	self:unscheduleUpdate()
+	if not self.boss then 
+		local boss = ArmyFactory.createBoss(1)
+	  	boss:commIntoGame()
+	  	boss:setPosition(cc.p(display.cx* 2.5, 275/2+ 180))
+	  	boss:setPhysics()
+	  	self.Layer:addChild(boss,10)
+	  	self.boss = boss
+		  	--这里应该根据一个表来设置速度
+	end
 end
 
 function StartScene:getSpeedTbl( id )
@@ -244,69 +302,94 @@ function StartScene:addPhysicsEvent(  )
 		local spriteA = contact:getShapeA():getBody():getNode()
 		local spriteB = contact:getShapeB():getBody():getNode()
 
-		local function showHeroInjure( hurtId )
-			local shineAct = cc.Sequence:create(cc.FadeOut:create(0.2), cc.FadeIn:create(0.15))
-			self.hero:runAction(cc.Repeat:create(shineAct, 6))
-
-			local deltaHp = self:getDeltaHp( hurtId )
-			self.heroHp_ = self.heroHp_ - deltaHp
-			if self.heroHp_ <= 0 then
-				--停止缓慢低地弹出游戏
-				self:EnterGameOverScene()	
-
-			end
-			self.heroHpBar:setPercent(self.heroHp_)
-		end
-
-		--如果是两个精灵自己的碰撞就不执行下面逻辑了
-		if spriteA and (spriteA:getTag() == 1 ) and spriteB and (spriteB:getTag() == 1 ) then 
+		--如果是两个精灵与boss的碰撞就不执行下面逻辑了
+		if spriteA and (spriteA:getTag() ==const.NORMAL_ARMY ) and spriteB and ((spriteB:getTag() == const.NORMAL_ARMY ) or (spriteB:getTag() == const.BOSS))  then 
 			return 
 		end 
+		if spriteB and (spriteB:getTag() == const.NORMAL_ARMY) and spriteA and ((spriteA:getTag() == const.NORMAL_ARMY) or (spriteA:getTag() == const.BOSS)) then 
+			return 
+		end
 
 
 		local armyId 
-		if spriteA and (spriteA:getTag() == 1) and (spriteB:getTag() == 100) then
-			if self.hero:getState() == "ATTACK" then
-				self.effect:setPosition(cc.p(spriteA:getPositionX() -20, spriteA:getPositionY()))
-				self.effectTimeLine:play("Strike", false)
-
-				--设置被打飞的速度
-				local index = self:getIndexOfWorld(self.heroScore_)
-				self.index  = index 
-				local speed = Army001Speed[self.index]
-				spriteA:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
-				--打击敌人的处理
-				self:defeatArmy(spriteA.typeId)
-				spriteA:playDefeatEffect()
-				spriteA:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
-					cc.RemoveSelf:create(false)))
-			else
-				armyId = spriteA.typeId
-				showHeroInjure( armyId)
-			end
-			
-		elseif spriteB and (spriteB:getTag() == 1) and (spriteA:getTag() == 100) then
-			if self.hero:getState() == "ATTACK" then
-				self.effect:setPosition(cc.p(spriteB:getPositionX() -20, spriteB:getPositionY()))
-				self.effectTimeLine:play("Strike", false)
-				spriteB:playDefeatEffect()
-				spriteB:getPhysicsBody():setVelocity(cc.p(200,200))
-
-				--打击敌人的处理
-				self:defeatArmy(spriteB.typeId)
-				spriteB:runAction(cc.Sequence:create(cc.RotateBy:create(1, 720),
-						cc.RemoveSelf:create(false)))
-			else
-				armyId = spriteB.typeId
-				showHeroInjure( armyId)
-			end
-		end
+		self:dealPhysicsContact(spriteA, spriteB)
 	end
 
 	local physicsListener = cc.EventListenerPhysicsContact:create()
 	physicsListener:registerScriptHandler(onContactBegan, cc.Handler.EVENT_PHYSICS_CONTACT_BEGIN)
 	local eventDispatcker = self:getEventDispatcher()
 	eventDispatcker:addEventListenerWithSceneGraphPriority(physicsListener, self)
+end
+
+function StartScene:dealPhysicsContact( spriteA, spriteB )
+	local function showHeroInjure( hurtId )
+		local act1 = RedFilter:create(0.2, 0, 1.0, true)
+		local shineAct = cc.Sequence:create(act1, act1:reverse())
+		self.hero:runAction( cc.Repeat:create(shineAct, 2) )
+
+		local deltaHp = self:getDeltaHp( hurtId )
+		self.heroHp_ = self.heroHp_ - deltaHp
+		if self.heroHp_ <= 0 then
+			--停止缓慢低地弹出游戏
+			local event =  cc.EventCustom:new(EventConst.HERO_DIE)
+			cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
+		end
+		self.heroHpBar:setPercent(self.heroHp_)
+	end
+
+	--如果是普通敌人与主角的碰撞
+	if GameFuc.isHeroContactWithNormalArmy( spriteA, spriteB ) then 
+		--确定第一个为主角
+		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
+		local bodyArmy = GameFuc.getNormalArmy( spriteA, spriteB )
+		if self.hero:getState() == "ATTACK" then
+			self.effect:setPosition(cc.p(bodyArmy:getPositionX() -20, bodyArmy:getPositionY()))
+			self.effectTimeLine:play("Strike", false)
+
+			--设置被打飞的速度
+			local index = self:getIndexOfWorld(self.heroScore_)
+			self.index  = index 
+			local speed = Army001Speed[self.index]
+			bodyArmy:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
+			--打击敌人的处理
+			self:defeatArmy(bodyArmy.typeId)
+			bodyArmy:playDefeatEffect()
+			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
+				cc.RemoveSelf:create(false)))
+		else
+			armyId = bodyArmy.typeId
+			showHeroInjure( armyId)
+		end
+
+	end
+
+	--如果是子弹与主角的碰撞
+	if GameFuc.isHeroContactWithBullet(spriteA, spriteB) then 
+		--确定第一个为主角
+		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
+		local bodyBullet = GameFuc.getBullet( spriteA, spriteB )
+		--如果角色是攻击状态就返回
+		if self.hero:getState() == "ATTACK" then
+			bodyBullet:reverseSpeed()
+		else
+			armyId = bodyBullet.typeId
+			showHeroInjure( armyId)
+		end
+	end
+
+	--子弹和boss的碰撞
+	if GameFuc.isBulletContactWithBoss(spriteA, spriteB ) then 
+		local bodyBullet = GameFuc.getBullet( spriteA, spriteB )
+		local bodyBoss = GameFuc.getBoss(spriteA, spriteB)
+		--Boss被子弹打到后
+		if not bodyBoss then return end
+
+		--向左方向的返回
+		if bodyBullet.dir == const.DIRECTTOR_LEFT then return end
+
+		bodyBoss:playDefeatEffect()
+	end
+	
 end
 
 function StartScene:getDeltaHp( hurtId )
@@ -319,6 +402,8 @@ function StartScene:getDeltaHp( hurtId )
 		return HurtOfArmy002[self.diffculty]
 	elseif hurtId == 3 then 
 		return HurtOfArmy003[self.diffculty]
+	else
+		return 20
 	end
 end
 
@@ -333,10 +418,15 @@ function StartScene:createArmySomeTimeLater(  )
 
 		time = time + deta
 		--获得创建敌人的时间
-		local createArmyTime = self:getArmyCreateTime(self.index)
-		if time >=  createArmyTime then
-			self:createArmy()
-			time = 0
+		if self:isNeedCreateArmy() then 
+		--如果不需要创造敌人就取消计时器来创造敌人
+			local createArmyTime = self:getArmyCreateTime(self.index)
+			if time >=  createArmyTime then
+				self:createArmy()
+				time = 0
+			end
+		else 
+			self:createBoss()
 		end
 	end
 
@@ -422,15 +512,24 @@ function StartScene:playBgSound(  )
 	AudioEngine.playMusic("music/bg/World1.mp3", true)
 end
 
-function StartScene:EnterGameOverScene(  )
+
+function StartScene:EnterGameOverScene( flagWin  )
 	--有没有超过记录
 	self:SaveHighestScore()
 	self:saveScore()
 
 	--进入到结算场景
-	local scene = require("app.GameScene.GameOverScene").new()
-	local fadeIn = cc.TransitionFade:create(1,scene, cc.c3b(255, 0, 0) )
-	cc.Director:getInstance():replaceScene(fadeIn)
+	local function getInNext()
+		local scene = require("app.GameScene.GameOverScene").new()
+		cc.Director:getInstance():replaceScene(scene)
+	end
+	if flagWin == false then 
+		local scene = require("app.GameScene.GameOverScene").new()
+		local fadeIn = cc.TransitionFade:create(1,scene, cc.c3b(255, 0, 0) )
+		cc.Director:getInstance():replaceScene(fadeIn)
+	elseif flagWin == true then 
+		self:runAction(cc.Sequence:create( cc.DelayTime:create(1.5),cc.CallFunc:create(getInNext)  ))
+	end
 
 
 end

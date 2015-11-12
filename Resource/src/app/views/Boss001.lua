@@ -25,16 +25,20 @@ end
 function Boss001:initData(  )
 	--设置随机数
 	math.randomseed(os.time())
-	self.typeId = 1
-	self:setTag(10)
+	self.typeId = const.BOSS
+	self:setTag(const.BOSS)
 	self.body = self:getChildByName("Body")
 	self.time = 0
+	self.hp = 3
+end
+
+function Boss001:commIntoGame(  )
+	self:Walk()
+	self:runAction(cc.Sequence:create(cc.MoveBy:create(2, cc.p(-display.cx, 0)), cc.CallFunc:create(handler(self, self.Idle) )))
 end
 
 function Boss001:Walk(  )
 	self.act:play("walk", true)
-
-	self:runAction(cc.Sequence:create(cc.MoveBy:create(2, cc.p(-display.cx, 0)), cc.CallFunc:create(handler(self, self.Idle) )))
 end
 
 function Boss001:Idle(  )
@@ -42,16 +46,33 @@ function Boss001:Idle(  )
 end
 
 function Boss001:Hited(  )
-	self.act:play("hit", true)
+	self.act:play("hit", false)
+	self.hp = self.hp - 1
+	if self.hp <= 0 then 
+		self:Died()
+	end
 end
 
 function Boss001:Died(  )
 	self.act:play("die", false)
+
+	--死亡时候关闭调度器
+	self:unscheduleUpdate()
+
+	self:runAction(cc.Sequence:create( cc.DelayTime:create(1), cc.RemoveSelf:create(true) ))
+
+	--发送boss死亡的事件
+	local event = cc.EventCustom:new(EventConst.BOSS01_DIE)
+	cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)	
 end
 
 function Boss001:Shoot(  )
 	self.act:play("shot", false)
 	self:runAction(cc.Sequence:create(cc.DelayTime:create(0.5), cc.CallFunc:create(self.Idle)))
+
+	local event = cc.EventCustom:new(EventConst.BOSS_SHOOT)
+	cc.Director:getInstance():getEventDispatcher():dispatchEvent( event )
+
 end
 
 function Boss001:scheduleAct( dt )
@@ -67,14 +88,6 @@ end
 function Boss001:playDefeatEffect(  )
 	self:Hited()
 	self:playHitSound()
-	local function dieEffect(  )
-		local effect = require ("app.Effect.ArmyDieEffect").new()
-		self:addChild(effect)
-		effect:playEffect()
-	end
-
-	local act = cc.Sequence:create(cc.DelayTime:create(0.4), cc.CallFunc:create(dieEffect) )
-	self:runAction(act)
 end
 
 function Boss001:playHitSound(  )

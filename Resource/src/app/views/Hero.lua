@@ -26,7 +26,7 @@ function Hero:init()
 end
 
 function Hero:initData(  )
-	self:setTag(100)
+	self:setTag(const.HERO)
 
 	self:setPosition(cc.p(display.cx/2, 275 ))
 

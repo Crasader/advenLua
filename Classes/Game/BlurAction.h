@@ -115,5 +115,109 @@ private:
 	GLProgramState* _state;
 };
 
+//发光特效
+
+class BloomUp : public ActionInterval
+{
+public:
+	static BloomUp* create(float time, float from  ,float indesty, bool isSkeleton = false);
+
+	virtual BloomUp* clone() const override;
+	virtual BloomUp* reverse() const override;
+	virtual void startWithTarget(Node *target) override;
+
+	virtual void update(float time) override;
+
+protected:
+	void setShader(std::string key);
+
+	BloomUp(){}
+
+	virtual ~BloomUp(){}
+
+	bool init(float time, float from  ,float indesty, bool isSke);
+
+private:
+	float _from;
+	float _duration;
+	float _indesty;
+	bool _isSke;
+	float _deltaNum;
+	float _num;
+
+
+	GLProgram* _shader;
+	GLProgramState* _state;
+
+
+};
+
+class BlurFilter : public ActionInterval
+{
+public:
+	static BlurFilter* create(float time, float from, float indesty, bool isSkeleton = false);
+
+	virtual BlurFilter* clone() const override;
+	virtual BlurFilter* reverse() const override;
+	virtual void startWithTarget(Node *target) override;
+
+	virtual void update(float time) override;
+
+protected:
+	void setShader(std::string key);
+
+	BlurFilter(){}
+
+	virtual ~BlurFilter(){}
+
+	bool init(float time, float from, float indesty, bool isSke);
+
+private:
+	float _from;
+	float _duration;
+	float _indesty;
+	bool _isSke;
+	float _deltaNum;
+	float _num;
+
+	GLProgram* _shader;
+	GLProgramState* _state;
+
+
+};
+
+//变红特效
+class RedFilter : public ActionInterval
+{
+public:
+	static RedFilter* create(float time, float from, float indesty, bool isSkeleton = false);
+
+	virtual RedFilter* clone() const override;
+	virtual RedFilter* reverse() const override;
+	virtual void startWithTarget(Node *target) override;
+
+	virtual void update(float time) override;
+
+protected:
+	void setShader(std::string key);
+
+	RedFilter(){}
+
+	virtual ~RedFilter(){}
+
+	bool init(float time, float from, float indesty, bool isSke);
+
+private:
+	float _from;
+	float _duration;
+	float _indesty;
+	bool _isSke;
+	float _deltaNum;
+	float _num;
+
+	GLProgram* _shader;
+	GLProgramState* _state;
+
+};
 
 #endif //__BLURACTION___

@@ -6,6 +6,7 @@ cc.FileUtils:getInstance():addSearchPath(adress.."res/", true)
 
 require "config"
 require "cocos.init"
+require "init"
 
 local function main()
     local scene = require("app.GameScene.LoadingAssetScene").new()

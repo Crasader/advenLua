@@ -19,4 +19,13 @@ int register_all_Blur_Action(lua_State* tolua_S);
 
 
 
+
+
+
+
+
+
+
+
+
 #endif // __Blur_Action_h__

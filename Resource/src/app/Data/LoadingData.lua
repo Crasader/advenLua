@@ -1,23 +1,28 @@
 plistFile = {
-	[1] = "plist/1001.plist",
-	[2] = "plist/1002.plist",
-	[3] = "plist/1003.plist",
-	[4] = "comon/UI_BigMap_Common01.plist",
-	[5] = "comon/UI_Common_Common01.plist",
-	[6] = "comon/UI_Common_Common02.plist",
-	[7] = "comon/UI_Monster_common.plist",
-	[8] = "SkillImg/ByStrike01_effect-hd.plist",
-	[9] = "SkillImg/ByStrike04_effect.plist",
-	[10] = "comon/UI_Fight_Common01.plist",
-	[11] = "plist/7005.plist"
+	"plist/1001.plist",
+	"plist/1002.plist",
+	"plist/1003.plist",
+	"plist/7005.plist",
+	"comon/UI_BigMap_Common01.plist",
+	"comon/UI_Common_Common01.plist",
+	"comon/UI_Common_Common02.plist",
+	"comon/UI_Monster_common.plist",
+	"UI_BuyGandD_Btn_Common.plist",
+	"UI_Fight_Common01.plist",
+	"UI_GameOverShow_Common.plist",
+	"UI_Monster_common.plist",
+	"UI_Ready_Common01.plist",
+	"SkillImg/ByStrike01_effect-hd.plist",
+	"SkillImg/ByStrike04_effect.plist",
 }
 
 pngFile = {
-	[1] = "skeleton.png",
-	[2] = "comon/UI_loading_blood_01.png",
-	[3] = "comon/UI_loading_blood_02.png",
-	[4] = "Map/Stage_BackGroup01_far.png",
-	[5] = "Map/Stage_BackGroup01_near.png",
+	"Spine/femaleHero.png",
+	"Spine/maleHero.png",
+	"comon/UI_loading_blood_01.png",
+	"comon/UI_loading_blood_02.png",
+	"Map/Stage_BackGroup01_far.png",
+	"Map/Stage_BackGroup01_near.png",
 }
 
 shaderFile = {

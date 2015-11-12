@@ -14,7 +14,6 @@ function LoadingAssetScene:init(  )
 
 	self.title = title
 
-	require "app.Data.LoadingData"
 
 	local function onNodeEvent(event)
 	    if event == "enter" then
@@ -34,6 +33,7 @@ function LoadingAssetScene:loadingAsset(  )
 	--加载plist
 	if plistFile then 
 		for c,v in pairs (plistFile) do
+			print(v)
 			cc.SpriteFrameCache:getInstance():addSpriteFrames(v)
 		end
 	end
@@ -48,9 +48,9 @@ function LoadingAssetScene:loadingAsset(  )
 	--加载shader
 	if shaderFile then 
 		for key , value in pairs (shaderFile) do
-			-- local shader = cc.GLProgram:createWithFilenames(value["vert"], value["frag"])
+			local shader = cc.GLProgram:createWithFilenames(value["vert"], value["frag"])
 			if shader then 
-				-- cc.GLProgramCache:getInstance():addGLProgram(shader, key)
+				cc.GLProgramCache:getInstance():addGLProgram(shader, key)
 			end
 		end
 	end

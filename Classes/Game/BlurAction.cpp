@@ -261,3 +261,255 @@ SharpFilterAct* SharpFilterAct::reverse() const
 	auto filter = SharpFilterAct::create(_duration, _to, _from,_isSke);
 	return filter;
 }
+
+//发光特效
+BloomUp* BloomUp::create(float time,float from, float indesty, bool isSkeleton)
+{
+	auto filter = new BloomUp();
+	if (filter->init(time, from ,indesty,  isSkeleton))
+	{
+		filter->autorelease();
+		return filter;
+	}
+	return nullptr;
+}
+
+bool BloomUp::init(float time,float from , float indesty, bool isSke)
+{
+	if (ActionInterval::initWithDuration(time))
+	{
+		_duration = time;
+		_isSke = isSke;
+		_from = from;
+		_indesty = indesty;
+		
+		//set the shader
+		if (_isSke)
+			this->setShader("BloomUpMVP");
+		else
+			this->setShader("BloomUpP");
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
+
+		return true;
+	}
+	return false;
+
+}
+
+void BloomUp::startWithTarget(Node *target)
+{
+	ActionInterval::startWithTarget(target);
+
+	target->setGLProgramState(_state);
+	
+	_num = _from;
+
+	_deltaNum = _indesty - _from;
+
+	_state->setUniformFloat(_shader->getUniformLocationForName("intensity"), 0.0f);
+
+
+}
+
+void BloomUp::update(float time)
+{
+	auto animationInter = 1.0f / Director::getInstance()->getAnimationInterval();
+	_num += _deltaNum / ((animationInter)* _duration);
+	_state->setUniformFloat(_shader->getUniformLocationForName("intensity"), _num);
+
+}
+
+BloomUp* BloomUp::clone() const
+{
+	return BloomUp::create(_duration, _from, _indesty ,_isSke);
+}
+
+BloomUp* BloomUp::reverse() const
+{
+	return BloomUp::create(_duration, _indesty, _from , _isSke);
+}
+
+void BloomUp::setShader(std::string key)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(key);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+			_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/BloomUp.frag");
+		else
+			_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/BloomUp.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, key);
+	}
+}
+
+//动态模糊特效
+
+BlurFilter* BlurFilter::create(float time, float from, float indesty, bool isSkeleton /* = false */)
+{
+	auto fliter = new BlurFilter();
+	if (fliter->init(time, from, indesty, isSkeleton))
+	{
+		fliter->autorelease();
+		return fliter;
+	}
+	return nullptr;
+}
+
+bool BlurFilter::init(float time, float from, float indesty, bool isSke)
+{
+	if (ActionInterval::initWithDuration(time))
+	{
+		_duration = time;
+		_from = from;
+		_indesty = indesty;
+		_isSke = isSke;
+
+		if (_isSke)
+			this->setShader("BlurFilterMVP");
+		else
+			this->setShader("BlurFilterP");
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
+
+		return true;
+	}
+	return false;
+}
+
+void BlurFilter::startWithTarget(Node *target)
+{
+	ActionInterval::startWithTarget(target);
+
+	target->setGLProgramState(_state);
+
+	_num = _from;
+
+	_deltaNum = _indesty - _from;
+
+	_state->setUniformFloat(_shader->getUniformLocationForName("blurRadius"), _num);
+
+}
+
+void BlurFilter::update(float time)
+{
+	auto animationInter = 1.0f / Director::getInstance()->getAnimationInterval();
+	_num += _deltaNum / ((animationInter)* _duration);
+	_state->setUniformFloat(_shader->getUniformLocationForName("blurRadius"), _num);
+}
+
+void BlurFilter::setShader(std::string key)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(key);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+			_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/Blur.frag");
+		else
+			_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/Blur.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, key);
+	}
+}
+
+BlurFilter* BlurFilter::clone() const
+{
+	return BlurFilter::create(_duration, _from, _indesty, _isSke);
+}
+
+BlurFilter* BlurFilter::reverse() const
+{
+	return BlurFilter::create(_duration, _indesty, _from, _isSke);
+}
+
+//变红特效
+RedFilter* RedFilter::create(float time, float from, float indesty, bool isSkeleton /* = false */)
+{
+	auto filter = new RedFilter();
+	if (filter->init(time, from, indesty, isSkeleton))
+	{
+		filter->autorelease();
+
+		return filter;
+	}
+
+	return nullptr;
+}
+
+bool RedFilter::init(float time, float from, float indesty, bool isSke)
+{
+	if (ActionInterval::initWithDuration(time))
+	{
+		_duration = time;
+		_from = from;
+		_indesty = indesty;
+		_isSke = isSke;
+
+		if (_isSke)
+			this->setShader("RedFilterMVP");
+		else
+			this->setShader("RedFilterP");
+
+		_state = GLProgramState::getOrCreateWithGLProgram(_shader);
+
+		return true;
+	}
+	return false;
+}
+
+void RedFilter::startWithTarget(Node *target)
+{
+	ActionInterval::startWithTarget(target);
+
+	target->setGLProgramState(_state);
+
+	_num = _from;
+
+	_deltaNum = _indesty - _from;
+
+	_state->setUniformFloat(_shader->getUniformLocationForName("uNumber"), _num);
+}
+
+void RedFilter::update(float time)
+{
+	auto animationInter = 1.0f / Director::getInstance()->getAnimationInterval();
+	_num += _deltaNum / ((animationInter)* _duration);
+	_state->setUniformFloat(_shader->getUniformLocationForName("uNumber"), _num);
+}
+
+RedFilter* RedFilter::clone() const
+{
+	return RedFilter::create(_duration, _from, _indesty, _isSke);
+}
+
+RedFilter* RedFilter::reverse() const
+{
+	return RedFilter::create(_duration, _indesty, _from, _isSke);
+}
+void RedFilter::setShader(std::string key)
+{
+	auto shader = GLProgramCache::getInstance()->getGLProgram(key);
+	if (shader != nullptr)
+	{
+		_shader = shader;
+	}
+	else
+	{
+		if (_isSke)
+			_shader = GLProgram::createWithFilenames("myShader/MVP_Stand.vert", "myShader/RedFilter.frag");
+		else
+			_shader = GLProgram::createWithFilenames("myShader/P_stand.vert", "myShader/RedFilter.frag");
+
+		GLProgramCache::getInstance()->addGLProgram(_shader, key);
+	}
+}
+
