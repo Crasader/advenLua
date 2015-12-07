@@ -4,14 +4,14 @@ plistFile = {
 	"plist/1003.plist",
 	"plist/7005.plist",
 	"comon/UI_BigMap_Common01.plist",
+	"comon/UI_BuyGandD_Btn_Common.plist",
 	"comon/UI_Common_Common01.plist",
 	"comon/UI_Common_Common02.plist",
+	"comon/UI_Fight_Common01.plist",
+	"comon/UI_GameOverShow_Common.plist",
 	"comon/UI_Monster_common.plist",
-	"UI_BuyGandD_Btn_Common.plist",
-	"UI_Fight_Common01.plist",
-	"UI_GameOverShow_Common.plist",
-	"UI_Monster_common.plist",
-	"UI_Ready_Common01.plist",
+	"comon/UI_Monster_common.plist",
+	"comon/UI_Ready_Common01.plist",
 	"SkillImg/ByStrike01_effect-hd.plist",
 	"SkillImg/ByStrike04_effect.plist",
 }
@@ -32,6 +32,13 @@ shaderFile = {
 	["EdgeFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/EdgeFilter.frag"},
 	["BoxFilterMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
 	["BoxFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/BoxFilter.frag"},
+	["BloomUpMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/BloomUp.frag"},
+	["BloomUpP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/BloomUp.frag"},
+	["BlurFilterMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/Blur.frag"},
+	["BlurFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/Blur.frag"},
+	["RedFilterMVP"] = {["vert"] = "myShader/MVP_Stand.vert", ["frag"] = "myShader/RedFilter.frag"},
+	["RedFilterP"] = {["vert"] = "myShader/P_stand.vert", ["frag"] = "myShader/RedFilter.frag"},
+
 }
 
 --背景音乐

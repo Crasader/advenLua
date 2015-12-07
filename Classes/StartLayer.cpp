@@ -1,6 +1,6 @@
 #include "StartLayer.h"
 #include "CCLuaEngine.h"
-
+#include "Game/BlurAction.h"
 #include "cocostudio/CocoStudio.h"
 
 USING_NS_CC;
@@ -25,20 +25,30 @@ Scene* StartLayer::createScene(){
 }
 
 bool StartLayer::init(){
+	LayerColor::initWithColor(Color4B::BLACK);
+	auto size = Director::getInstance()->getVisibleSize();
 
+	FileUtils::getInstance()->addSearchPath("res");
+	auto bg = Sprite::create("HelloWorld.png");
+	bg->setPosition(size / 2);
+	bg->setOpacity(0);
+	addChild(bg);
+	auto act = BloomUp::create(0.5, 0, 0.4);
+	bg->runAction(Sequence::create(FadeIn::create(0.5),act, DelayTime::create(1), RemoveSelf::create(true), NULL));
+	this->runAction(Sequence::create(DelayTime::create(2), CallFunc::create([this](){
+		this->checkNeedUpdate();
+	}), NULL));
 
-	this->checkNeedUpdate();
-
-
-
+	auto title = Label::createWithSystemFont("This Game Developed By", "Courier", 30);
+	title->setPosition(Vec2(size.width / 2, bg->getPositionY() + bg->getContentSize().height/2 + 30));
+	addChild(title);
+	title->runAction(Sequence::create(DelayTime::create(2), RemoveSelf::create(true), NULL));
 	return true;
 }
 
 void StartLayer::checkNeedUpdate(){
+
 	m_address = FileUtils::getInstance()->getWritablePath();
-
-
-
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32)
 	DIR *pDir = NULL;
 
@@ -61,11 +71,8 @@ void StartLayer::checkNeedUpdate(){
 		"http://112.74.214.142/version.php",
 		m_address.c_str(),
 		[this](int a){
-		log("error,%d", a);
-		
+		log("error,%d", a);	
 		this->goToLua();
-		
-
 	},
 		[this](int a){
 		log("down loading");
@@ -100,20 +107,24 @@ void StartLayer::checkNeedUpdate(){
 	else{
 		this->goToLua();
 	}
-		
-
 }
 
+void StartLayer::onExit() 
+{
+	Node::onExit();
+	_assetManager->release();
+
+	Director::getInstance()->getTextureCache()->removeAllTextures();
+
+}
 void StartLayer::addAssetLayer(){
 	FileUtils::getInstance()->addSearchPath("res/", true);
 	auto assetNode = CSLoader::createNode("Scene/LoadingAsetLayer.csb");
-	
+	assetNode->setVisible(false);
 	auto size = Director::getInstance()->getWinSize();
 	auto m_size = Size(size.width / 960, size.height / 640);
 	assetNode->setScaleX(m_size.width);
 	assetNode->setScaleY(m_size.height);
-	assetNode->runAction(Sequence::createWithTwoActions(Place::create(Vec2(0, size.height)),
-		MoveBy::create(0.3, Vec2(0, -size.height))));
 	addChild(assetNode);
 
 	auto btnCancel = assetNode->getChildByName<ui::Button*>("ButtonCancel");
@@ -133,6 +144,8 @@ void StartLayer::addAssetLayer(){
 	text = assetNode->getChildByName<ui::Text*>("Text");
 	loadingBar = assetNode->getChildByName<ui::LoadingBar*>("LoadingBar");
 
+	assetNode->runAction(Sequence::create(Place::create(Vec2(0, size.height)), Show::create(),
+		MoveBy::create(0.3, Vec2(0, -size.height)), NULL));
 }
 
 void StartLayer::startDownload(){

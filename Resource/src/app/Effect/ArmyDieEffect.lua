@@ -17,7 +17,7 @@ function EffectArmyDie:playEffect(  )
 end
 
 function EffectArmyDie:playDieSound(  )
-	AudioEngine.playEffect("music/effect/monster_die_fire.mp3", false)
+	AudioManager.playArmyDieEffect()
 end
 
 return EffectArmyDie

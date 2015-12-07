@@ -1,17 +1,17 @@
 module("ArmyFactory", package.seeall)
 
 function createArmy001()
-	local army = require("app.views.Army001").new()
+	local army = require("app.views.NormalArmy").new(NormalArmyData[1])
 	return army
 end
 
 function createArmy002(  )
-	local army = require("app.views.Army002").new()
+	local army = require("app.views.NormalArmy").new(NormalArmyData[2])
 	return army
 end
 
 function createArmy003(  )
-	local army = require("app.views.Army003").new()
+	local army = require("app.views.NormalArmy").new(NormalArmyData[3])
 	return army
 end
 
@@ -26,13 +26,15 @@ function createBoss( id )
 end
 
 function createArmyById( id )
+	local army
 	if id == 1 then 
-		return ArmyFactory.createArmy001()
+		army = ArmyFactory.createArmy001() 
 	elseif id == 2 then 
-		return ArmyFactory.createArmy002()
+		army = ArmyFactory.createArmy002()
 	elseif id == 3 then 
-		return ArmyFactory.createArmy003()
+		army = ArmyFactory.createArmy003()
 	end
+	return army
 end
 
 

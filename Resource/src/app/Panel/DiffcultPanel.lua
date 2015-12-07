@@ -31,7 +31,7 @@ function DiffcultPanel:ctor(  )
 end
 
 function DiffcultPanel:getToStart(  )
-	local panel = require("app.Panel.SelectRolePanel").new()
+	local panel = PanelManager.createSelectRolePanel()
 
 	panel:setPosition(cc.p(display.cx/2, display.cy * 2 ))
 	local size = panel:getContentSize()

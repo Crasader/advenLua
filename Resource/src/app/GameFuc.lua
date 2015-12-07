@@ -27,6 +27,24 @@ function isBulletContactWithBoss( spriteA, spriteB )
 	return false
 end
 
+--子弹是否与普通怪物碰撞
+function isBulletContactWithArmy( spriteA, spriteB )
+	if spriteA and (spriteA:getTag() == const.BULLET) and (spriteB:getTag() == const.NORMAL_ARMY) 
+		or spriteB and (spriteB:getTag() == const.BULLET) and (spriteA:getTag() == const.NORMAL_ARMY) then
+		return true
+	end
+	return false
+end
+
+--主角是否与墙壁碰撞
+function isHeroContactWithWall( spriteA,  spriteB )
+	if spriteA and (spriteA:getTag() == const.HERO) and (spriteB:getTag() == const.WALL) 
+		or spriteB and (spriteB:getTag() == const.HERO) and (spriteA:getTag() == const.WALL) then
+		return true
+	end
+	return false
+end
+
 --根据传入碰撞的两个物体获得主角
 function getHero( spriteA, spriteB )
 	if spirteA and ( spriteA:getTag() == const.HERO ) then 
@@ -69,4 +87,10 @@ function getBoss( spriteA, spriteB )
 	if spriteB and ( spriteB:getTag() == const.BOSS ) then 
 		return spriteB
 	end
+end
+
+--派发事件
+function dispatchEvent(eventName)
+	local event = cc.EventCustom:new(eventName)
+	cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
 end

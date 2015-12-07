@@ -3,7 +3,6 @@
 #include "SimpleAudioEngine.h"
 #include "cocos2d.h"
 #include "lua_module_register.h"
-
 #include "StartLayer.h"
 
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_LINUX)
@@ -82,7 +81,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 		
 	
 
-	director->setDisplayStats(false);
+	director->setDisplayStats(true);
 
     // set default FPS
     Director::getInstance()->setAnimationInterval(1.0 / 60.0f);

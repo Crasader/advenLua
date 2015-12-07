@@ -10,7 +10,7 @@ USING_NS_CC_EXT;
 
 USING_NS_CC;
 
-class StartLayer : Layer {
+class StartLayer : LayerColor {
 
 public:
 	static Scene* createScene();
@@ -29,6 +29,8 @@ public:
 
 	//½øÈëlua
 	void goToLua();
+
+	void onExit();
 
 public:
 	AssetsManager* _assetManager;

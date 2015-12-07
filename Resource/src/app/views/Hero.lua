@@ -8,35 +8,56 @@ function Hero:ctor()
 	self:setMix("attack", "idle", 0.2)
 
 	self:setAnimation(0 ,"idle", true)
-	self.state_ = "IDLE"
+	self:changeState("IDLE")
 
+	self:initData()
 	local function onNodeEvent(event)
-    if event == "enter" then
-        self:init()
-    end
+	    if event == "enter" then
+	        self:init()
+	    end
   	end
-
   self:registerScriptHandler(onNodeEvent)
 end
 
 function Hero:init()
-	self:initData()
 	self:addEvent()
+
+	self.act = BloomUp:create(1, 0.0, 0.2, true)
+
+	self:runAction(cc.RepeatForever:create(cc.Sequence:create(self.act, self.act:reverse())))
 	
 end
 
 function Hero:initData(  )
 	self:setTag(const.HERO)
-
-	self:setPosition(cc.p(display.cx/2, 275 ))
-
 	--给英雄设置物理边框
-	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(200,275)))
+	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(120,250)))
 	--设置碰撞和接触掩码
-	-- self.hero:getPhysicsBody():setCollisionBitmask(0)
 	self:getPhysicsBody():setContactTestBitmask(1)
 	
+	self.physicsBody = self:getPhysicsBody()
+	self.physicsBody:setRotationEnable(false)
 
+	self.physicsBody:setPositionOffset(cc.p( 50,0 ))
+
+	self.hp_ = 100
+
+end
+
+function Hero:setHp( value )
+	self.hp_ = value
+end
+
+function Hero:getHp()
+	return self.hp_
+end
+
+function Hero:MinitesHp( value )
+	self.hp_ = self.hp_ - value
+end
+
+function Hero:addHp( value )
+	self.hp_ = self.hp_ + value
 end
 
 function Hero:addEvent()
@@ -56,6 +77,14 @@ function Hero:addEvent()
 
 	eventDispatcher_:addEventListenerWithSceneGraphPriority(listener, self)
 
+	--注册添加角色掉到木板
+	local onFloorEvent = cc.EventListenerCustom:create( EventConst.HERO_ON_WALL, handler(self, self.onFloor) )
+	eventDispatcher_:addEventListenerWithSceneGraphPriority(onFloorEvent, self)
+end
+
+function Hero:onFloor()
+	self:changeState( "Idle" )
+	self:Idle()
 end
 
 function Hero:setAnimationEvent(event)
@@ -68,35 +97,85 @@ function Hero:setAnimationEvent(event)
 
 		 if event.eventData.name == "attack_end" then 
 		 	print("attack End")
-		 	self:Idle()
+		 	--空中攻击不改变状态
+		 	if self:getState() == "AIRATTACK" then
+		 		
+		 	else
+			 	self:Idle()
+			 end
 		end
 end
 
-function Hero:dealTouch()
-	self:Attack()
-	return true
+function Hero:dealTouch(touch, event)
+	local x = touch:getLocation().x
+	--左侧就是跳跃，右侧是攻击
+	if x > display.width/2 then 		
+		self:Attack()
+	else
+		self:Jump()
+	end
+	return false
 end
 
 function Hero:Attack()
-	if self.state_ ~= "ATTACK" then
+	if self:getState() ~= "ATTACK" then
 		self:playAttackSound()
 		self:setAnimation(0, "attack", false)
-		self.state_ = "ATTACK"
+		if self:getState() == "JUMP" then 
+			self:changeState( "AIRATTACK" )
+		else
+			self:changeState("ATTACK")
+		end
 	end
 	
 end
 
+function Hero:Jump()
+	if self:getState() ~= "JUMP" and self:getState() ~= "AIRATTACK" then
+		-- self:setAnimation(0, "attack", false)
+		self:runAction(cc.JumpBy:create(1, cc.p(0,500), display.cy/2, 1))
+		self:changeState("JUMP")
+	end
+end
+
 function Hero:Idle()
-	self:setAnimation(0, "idle", true)
-	self.state_ = "IDLE"
+	if self:getState() ~= "IDLE" then
+		self:setAnimation(0, "idle", true)
+		self:changeState("IDLE")
+	end
 end
 
 function Hero:getState(  )
 	return self.state_
 end
 
+function Hero:setPreState( state )
+	self.preState_ = state
+end
+
+function Hero:getPreState()
+	return self.preState_
+end
+
+function Hero:changeState( state )
+	if not state then return end
+	self:setPreState(self:getState())
+	self.state_ = state
+end
+
+function Hero:ActWithState( state ) 
+end
+
 function Hero:playAttackSound(  )
- 	AudioEngine.playEffect( "music/effect/hero_attack.mp3" )
+ 	AudioManager.playMaleAttEffect()
+end
+
+--主角受到伤害
+function Hero:Injure()
+	--先显示受到伤害的动画
+	local act1 = RedFilter:create(0.2, 0, 1.0, true)
+	local shineAct = cc.Sequence:create(act1, act1:reverse())
+	self:runAction( cc.Sequence:create( cc.Repeat:create(shineAct, 2) , RedFilter:create(0.1, 0, 0.0, true) )  )
 end
 
 

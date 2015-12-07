@@ -16,8 +16,6 @@ function RankPanel:ctor( )
 		panel:setVisible(false)
 	end
   	self:registerScriptHandler(onNodeEvent)
-
-
 end
 
 function RankPanel:onEnter(  )
@@ -27,6 +25,7 @@ function RankPanel:initData(  )
 	--获得其的难度
 	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
 	self.diffculty = diffculty
+
 
 	self:createConnect()
 

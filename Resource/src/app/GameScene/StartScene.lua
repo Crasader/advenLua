@@ -4,9 +4,14 @@ end)
 
 function StartScene:ctor(  )
 	self:setPhysicsCondition()
-
 	self:initData()
-
+	self:playBgSound()
+	self:addUI()
+	self:addMainCharacter()
+	self:addPhysicsEvent()
+	self:createArmySomeTimeLater()
+	self:createGameCutScene()
+	self:addEvent()
 
 	local function onNodeEvent(event)
 	    if event == "enter" then
@@ -18,24 +23,16 @@ function StartScene:ctor(  )
 end
 
 function StartScene:onEnter(  )
-	self:playBgSound()
+	if not AudioEngine.isMusicPlaying() then 
+		AudioEngine.resumeMusic()
+	end
+	self:updateUI()
 
-	self:addUI()
-
-	self:addMainCharacter()
-
-	self:addPhysicsEvent()
-
-	self:createArmySomeTimeLater()
-
-	self:createGameCutScene()
-
-	self:addEvent()
 	
 end
 
 function StartScene:createGameCutScene()
-	self.gamecutScene = require("app.GameScene.GameCutScene").new()
+	self.gamecutScene = SceneManager.createGameCutScene()
 	self.gamecutScene:retain()
 end
 
@@ -46,7 +43,6 @@ function StartScene:DealWithBossShoot(  )
 	bullet:setPosition(display.width, display.cy)
 	bullet:setSpeed({x= -500, y= 0})
 	bullet:Fire()
-	-- bullet:runAction(cc.Spawn:create( cc.ScaleBy:create(2, 2), cc.MoveBy:create(2, cc.p(-display.width/2, 0)) ))
 end
 
 function StartScene:addEvent(  )
@@ -80,14 +76,11 @@ end
 
 function StartScene:DealWithResume()
 	AudioEngine.resumeMusic()
-	cc.Director:getInstance():startAnimation()
 end
 
 function StartScene:DealWithGamecut(  )
 	if self.gamecutScene then 
 		AudioEngine.pauseMusic()
-		cc.Director:getInstance():stopAnimation()
-		local scene = self.gamecutScene
 
 		local rendTex = self.rendTex
 		if not rendTex then 
@@ -95,18 +88,11 @@ function StartScene:DealWithGamecut(  )
 			rendTex:retain()
 			self.rendTex = rendTex
 		end
-
 		rendTex:beginWithClear(0, 0, 0, 1.0)
-
 		self.Layer:visit()
-
 		rendTex:endToLua()
-
-		scene:initWithTexture(rendTex:getSprite():getTexture())
-
-		cc.Director:getInstance():pushScene(scene)
-		scene:toGuass()
-		
+		self.gamecutScene:initWithTexture(rendTex:getSprite():getTexture())
+		cc.Director:getInstance():pushScene(self.gamecutScene)
 	end
 end
 
@@ -119,20 +105,16 @@ function StartScene:DealWithHeroDie()
 end
 
 function StartScene:initData(  )
-	self.heroHp_ = 100
 	self.heroScore_ = 0
 	self.index = 1
 	self.armyNum =  0
-
 	--获得难度选择
 	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
-
 	self.diffculty = diffculty
-
 	--获得产生的角色的id
 	local heroID = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
-
 	self.heroId = heroID
+	self:retain()
 end
 
 function StartScene:addUI(  )
@@ -142,105 +124,77 @@ function StartScene:addUI(  )
 	self.Layer = layer
 	--add Back
 	local backGround = LevelFactory.createLavel1()
-	backGround:setPosition(cc.p(0, 0))
-	local nextBg = LevelFactory.createLavel1()
-	nextBg:setPosition(cc.p(display.width, 0))
-	nextBg:setRotation3D(cc.vec3(0,60,0))
-	local lastBg = LevelFactory.createLavel1()
-	backGround:setPosition(cc.p(2*display.width - 1, 0))
+	local backGround2 = LevelFactory.createLavel1()
 	self.Layer:addChild(backGround)
-	self.Layer:addChild(nextBg)
-	self.Layer:addChild(lastBg)
-
+	self.Layer:addChild(backGround2)
+	--控制背景层
+	local mapController = ObjectManager.createMapControl(backGround, backGround2)
+	self.Layer:addChild(mapController)
+	
 	--添加暂停键
-	local btnZT = cc.CSLoader:createNode("MainUI/ZanTingBTN.csb")
+	local btnZT = UIManager.createCutBtn()
 	btnZT:setPosition(cc.p( 50, display.height - 35 ))
-	btnZT:setScale(2)
 	self.Layer:addChild(btnZT,20)
 
-	self.pauseTag = false
-	--得到按钮并且设置监听
-	local btn = btnZT:getChildByName("Button")
-	local function onTouch( sender, eventType )
-		if eventType ~= ccui.TouchEventType.ended then return end
-		local event = cc.EventCustom:new(EventConst.GAME_CUT)
-		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
-	end
-	btn:addTouchEventListener( onTouch )
-
 	--add Hp
-	local hp = cc.CSLoader:createNode("MainUI/HP.csb")
-	hp:setScaleY(2.0)
-	self.heroHpBar = hp:getChildByName("HP")
-	self.heroHpBar:setPercent(self.heroHp_)
-	hp:setPosition(cc.p(200, display.height - 20))
-	self.Layer:addChild(hp,20)
+	local hpPanel = UIManager.createHpBar()
+	--初始化设置其hp
+	hpPanel:setPosition(cc.p(200, display.height - 20))
+	self.hpWidget = hpPanel
+	self.Layer:addChild(hpPanel,20)
 
 	--add Score
-	local scoreNode = cc.CSLoader:createNode("MainUI/Score.csb")
-	self.score = scoreNode:getChildByName("Score")
-
+	local scoreNode = UIManager.createScorePanel()
+	
 	scoreNode:setPosition(cc.p(display.width - 120, display.height - 16))
 	self.Layer:addChild(scoreNode,20)
+	self.score = scoreNode
 	self:setScore()
 
 	--add Effect
-	local effect = cc.CSLoader:createNode("Effect/attackEffect.csb")
+	local effect = EffectFactory.createNorAttackEffect()
 	effect:setVisible(false)
 	effect:setScale(2)
+	effect:setSpeed(3)
 	self.Layer:addChild(effect)
-	local effectTimeLine = cc.CSLoader:createTimeline("Effect/attackEffect.csb")
-	effectTimeLine:setTimeSpeed(3)
-
-	local function onFrameEvent( frame )
-		if nil == frame then
-			return 
-		end
-
-		local str = frame:getEvent()
-		if str == "end" then
-			effect:setVisible(false)
-		end
-
-		if str == "start" then
-			effect:setVisible(true)
-		end
-	end
-	effectTimeLine:setFrameEventCallFunc(onFrameEvent)
-	effect:runAction(effectTimeLine)
-	self.effectTimeLine = effectTimeLine
 	self.effect = effect
 
 end
 
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
-	physicsWorld:setGravity(cc.p(0,-300))
-	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	physicsWorld:setGravity(cc.p(0,-500))
+	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
 	--添加物理世界框
-
-	local wall = cc.Node:create()
-	wall:setPosition(cc.p(display.cx, display.cy +  275/2 ))
+	local wall = PhysicsManager.createWall()
+	wall:setPosition(cc.p(display.cx, display.height +  275/2 ))
 	self.Layer:addChild(wall,20)
-	wall:setPhysicsBody(cc.PhysicsBody:createEdgeBox(cc.size(display.width*2,display.height)))
-
 
 	self.hero = self:createHeroById(self.heroId )
+	self.hero:setPosition(cc.p(display.cx/2, 275 ))
 	--最后才设置位置
 	self.Layer:addChild(self.hero,10)
   	self:createArmy()
 
-	
+	local x,y = self.hero:getPosition()
+	local cameraControl = ObjectManager.createCameraControl(self:getDefaultCamera(), cc.p(x,y))
+	self:addChild(cameraControl)
+
+end
+
+--更新UI
+function StartScene:updateUI()
+	self.hpWidget:setHp(self.hero:getHp())
 end
 
 function StartScene:createHeroById( id )
 	if id == 1 then
-		return require("app.views.Hero").new()
+		return MainRoleManager.createMaleHero()
 	elseif id == 2 then
-		return require("app.views.FemaleHero").new()
+		return MainRoleManager.createFemaleHero()
 	end
 end
 
@@ -285,16 +239,11 @@ function StartScene:getSpeedTbl( id )
 end
 
 function StartScene:isNeedCreateArmy(  )
-	-- if self.heroScore_ > World1Setting[#World1Setting] then 
-	-- 	return false
-	-- end
-	if self.armyNum <= 5 then 
+	if self.armyNum <= 50 then 
 		return true
 	else 
 		return false
 	end
-
-
 end
 
 function StartScene:addPhysicsEvent(  )
@@ -310,9 +259,23 @@ function StartScene:addPhysicsEvent(  )
 			return 
 		end
 
-
 		local armyId 
 		self:dealPhysicsContact(spriteA, spriteB)
+
+		--英雄与普通敌人碰撞不进行碰撞模拟
+		if GameFuc.isHeroContactWithNormalArmy( spriteA, spriteB ) then 
+			return false
+		--英雄与子弹碰撞不进行碰撞模拟
+		elseif GameFuc.isHeroContactWithBullet(spriteA, spriteB) then 
+			return false
+		--子弹与boss不进行碰撞模拟
+		elseif GameFuc.isBulletContactWithBoss( spriteA, spriteB ) then 
+			return false
+		elseif GameFuc.isBulletContactWithArmy( spriteA, spriteB ) then 
+			return false
+		else
+			return true
+		end
 	end
 
 	local physicsListener = cc.EventListenerPhysicsContact:create()
@@ -323,18 +286,17 @@ end
 
 function StartScene:dealPhysicsContact( spriteA, spriteB )
 	local function showHeroInjure( hurtId )
-		local act1 = RedFilter:create(0.2, 0, 1.0, true)
-		local shineAct = cc.Sequence:create(act1, act1:reverse())
-		self.hero:runAction( cc.Repeat:create(shineAct, 2) )
-
+		self.hero:Injure()
 		local deltaHp = self:getDeltaHp( hurtId )
-		self.heroHp_ = self.heroHp_ - deltaHp
-		if self.heroHp_ <= 0 then
+		self.hero:MinitesHp(deltaHp)
+		if self.hero:getHp() <= 0 then
 			--停止缓慢低地弹出游戏
 			local event =  cc.EventCustom:new(EventConst.HERO_DIE)
 			cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
 		end
-		self.heroHpBar:setPercent(self.heroHp_)
+		if self.hpWidget then 
+			self.hpWidget:setHp(self.hero:getHp() )
+		end
 	end
 
 	--如果是普通敌人与主角的碰撞
@@ -342,9 +304,9 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		--确定第一个为主角
 		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
 		local bodyArmy = GameFuc.getNormalArmy( spriteA, spriteB )
-		if self.hero:getState() == "ATTACK" then
+		if self.hero:getState() == "ATTACK" or self.hero:getState() == "AIRATTACK" then
 			self.effect:setPosition(cc.p(bodyArmy:getPositionX() -20, bodyArmy:getPositionY()))
-			self.effectTimeLine:play("Strike", false)
+			self.effect:Strike()
 
 			--设置被打飞的速度
 			local index = self:getIndexOfWorld(self.heroScore_)
@@ -369,7 +331,7 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
 		local bodyBullet = GameFuc.getBullet( spriteA, spriteB )
 		--如果角色是攻击状态就返回
-		if self.hero:getState() == "ATTACK" then
+		if self.hero:getState() == "ATTACK" or self.hero:getState() == "AIRATTACK" then
 			bodyBullet:reverseSpeed()
 		else
 			armyId = bodyBullet.typeId
@@ -388,6 +350,12 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		if bodyBullet.dir == const.DIRECTTOR_LEFT then return end
 
 		bodyBoss:playDefeatEffect()
+	end
+
+	--主角与地板的碰撞
+	if GameFuc.isHeroContactWithWall( spriteA, spriteB ) then 
+		local event = cc.EventCustom:new( EventConst.HERO_ON_WALL )
+		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
 	end
 	
 end
@@ -409,14 +377,10 @@ end
 
 function StartScene:createArmySomeTimeLater(  )
 	local time = 0
+	local cleanTime = 0
 	local function update( deta )
-		local army = self.Layer:getChildByTag(1)
-
-		if army and army:getPositionX() <= 50 then
-			army:removeFromParent()
-		end
-
 		time = time + deta
+		cleanTime = cleanTime + deta
 		--获得创建敌人的时间
 		if self:isNeedCreateArmy() then 
 		--如果不需要创造敌人就取消计时器来创造敌人
@@ -428,11 +392,27 @@ function StartScene:createArmySomeTimeLater(  )
 		else 
 			self:createBoss()
 		end
+
+		--每秒清除一次
+		if cleanTime >= 1 then 
+			cleanTime = 0
+			self:cleanOutWindowArmy()
+		end
 	end
-
 	self.numUpdate = update
-
 	self:scheduleUpdateWithPriorityLua(update, 0)
+end
+
+--清除在界面外面的敌人
+function StartScene:cleanOutWindowArmy()
+	local armys = self.Layer:getChildren()
+	for c, army in pairs (armys) do
+		if army then 
+			if army:getPositionX() < 0 and army:getTag() == const.NORMAL_ARMY then 
+				army:removeFromParent()
+			end
+		end
+	end
 end
 
 function StartScene:getArmyCreateTime( index )
@@ -448,7 +428,7 @@ function StartScene:getArmyCreateTime( index )
 end
 
 function StartScene:setScore(  )
-	self.score:setText("Score:"..self.heroScore_)
+	self.score:setScore(self.heroScore_)
 end
 
 function StartScene:defeatArmy( id )
@@ -509,15 +489,13 @@ function StartScene:getWorldSetting(  )
 end
 
 function StartScene:playBgSound(  )
-	AudioEngine.playMusic("music/bg/World1.mp3", true)
+	AudioManager.playWorld1Sound()
 end
-
 
 function StartScene:EnterGameOverScene( flagWin  )
 	--有没有超过记录
 	self:SaveHighestScore()
 	self:saveScore()
-
 	--进入到结算场景
 	local function getInNext()
 		local scene = require("app.GameScene.GameOverScene").new()
@@ -530,8 +508,6 @@ function StartScene:EnterGameOverScene( flagWin  )
 	elseif flagWin == true then 
 		self:runAction(cc.Sequence:create( cc.DelayTime:create(1.5),cc.CallFunc:create(getInNext)  ))
 	end
-
-
 end
 
 function StartScene:SaveHighestScore(  )

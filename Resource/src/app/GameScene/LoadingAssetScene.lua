@@ -75,55 +75,15 @@ end
 function LoadingAssetScene:readyIntoGame(  )
 	if self:loadingAsset() then 
 		self:StartGame()
-	--	 self:getIntoForChun()
 	else
 		self:readyIntoGame()
 	end
 end
 
-function LoadingAssetScene:getIntoForChun(  )
-	local function goToPlay(  )
-		local scene = require("app.GameScene.MenuScene").new()
-		cc.Director:getInstance():replaceScene(scene)
-	end
-	math.randomseed(os.time())
-
-	local seed = math.random(1, 3)
-	local sp 
-	--2和3时候放图
-	if seed == 2 then 
-		sp = cc.Sprite:create("chun/chun02.png")
-		sp:setPosition(cc.p( display.cx/2, display.cy * 1.5))
-		self:addChild(sp)
-		self.title:setOpacity(0)
-		sp:setOpacity(0)
-		self.title:setSystemFontSize(50)
-		self.title:setString("高纯，有你真好...")
-		sp:runAction(cc.Sequence:create( cc.FadeIn:create(1.0),cc.DelayTime:create(1.0),cc.FadeOut:create(2.0) ))
-	elseif seed == 3 then 
-		sp = cc.Sprite:create("chun/chun.png")
-		sp:setPosition(cc.p( display.cx/1.5, display.cy * 1.5))
-		self:addChild(sp)
-		self.title:setOpacity(0)
-		self.title:setSystemFontSize(30)
-		self.title:setPositionY(display.cy - 100)
-		self.title:setString("亲爱的纯：\n 不知不觉咱们在一起这么久 \n 这么久来也没跟你说过什么情话 \n 这么久以来真是麻烦你的照顾了\n 跟你在一起的每一天都很开心 \n 你不在这里很不习惯 \n 很想念你 \n")
-		sp:setOpacity(0)
-		sp:runAction(cc.Sequence:create( cc.Spawn:create(cc.FadeIn:create(1.0), cc.ScaleTo:create(1,1.2)) , cc.DelayTime:create(1.0),cc.Spawn:create(cc.FadeOut:create(2.0),  cc.ScaleTo:create(2.0, 1.0)) ))
-
-	else
-		self.title:setSystemFontSize(50)
-		self.title:setOpacity(0)
-		self.title:setString("即将开始你的冒险旅程...")
-	end
-		self.title:runAction(cc.FadeIn:create(1.0))
-		
-		self.title:runAction(cc.Sequence:create( cc.DelayTime:create(5.0),cc.FadeOut:create(1.5), cc.CallFunc:create( goToPlay )) )
-end
 
 function LoadingAssetScene:StartGame(  )
 	local function goToPlay(  )
-		local scene = require("app.GameScene.MenuScene").new()
+		local scene = SceneManager.createMainMenuScene()
 		cc.Director:getInstance():replaceScene(scene)
 	end
 	self.title:setString("冒险即将开始...")

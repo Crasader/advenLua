@@ -37,7 +37,8 @@ function SelectRolePanel:initData(  )
 end
 
 function SelectRolePanel:getToStart(  )
-	 local scene = require("app.GameScene.StartScene").new()
+	 -- local scene = require("app.GameScene.StartScene").new()
+	 local scene = SceneManager.createStartScene()
 	cc.Director:getInstance():replaceScene(scene)
 end
 

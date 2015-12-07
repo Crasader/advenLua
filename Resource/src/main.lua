@@ -9,7 +9,7 @@ require "cocos.init"
 require "init"
 
 local function main()
-    local scene = require("app.GameScene.LoadingAssetScene").new()
+    local scene = SceneManager.createLoadingScene()
 	cc.Director:getInstance():replaceScene(scene)
 end
 

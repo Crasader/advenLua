@@ -4,10 +4,10 @@ precision mediump float;
 
 varying vec2 v_texCoord;
 
-uniform float blurRadius = 10;
+uniform float blurRadius;
 
 const vec2 resolution = vec2( 512, 512 );
-const float sampleNum = 5;
+const float sampleNum = 5.0f;
 
 vec3 blur(vec2);
 
@@ -21,7 +21,7 @@ vec3 blur(vec2 p)
 {
     if (blurRadius > 0.0 && sampleNum > 1.0)
     {
-        vec3 col = vec3(0);
+        vec3 col = vec3(0.0);
         vec2 unit = 1.0 / resolution.xy;
         
         float r = blurRadius;
