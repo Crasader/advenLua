@@ -16,6 +16,8 @@ function StartScene:ctor(  )
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
+	    elseif event == "exit" then 
+	    	self:onExit()
 	    end
   	end
 
@@ -27,8 +29,10 @@ function StartScene:onEnter(  )
 		AudioEngine.resumeMusic()
 	end
 	self:updateUI()
+end
 
-	
+function StartScene:onExit()
+	GameFuc.setSpeedScale(1)
 end
 
 function StartScene:createGameCutScene()

@@ -72,9 +72,10 @@ function Hero:addEvent()
 	self:registerSpineEventHandler(handler(self, self.setAnimationEvent), sp.EventType.ANIMATION_EVENT)
 
 	--注册添加触摸监听器
-	local listener = cc.EventListenerTouchOneByOne:create()
-	listener:registerScriptHandler(handler(self, self.dealTouch), cc.Handler.EVENT_TOUCH_BEGAN)
-
+	local listener = cc.EventListenerTouchAllAtOnce:create()
+	listener:registerScriptHandler(handler(self, self.dealTouchBegan), cc.Handler.EVENT_TOUCHES_BEGAN)
+	listener:registerScriptHandler(handler(self, self.dealTouchMoved), cc.Handler.EVENT_TOUCHES_MOVED)
+	listener:registerScriptHandler(handler(self, self.dealTouchEnded), cc.Handler.EVENT_TOUCHES_ENDED)
 	eventDispatcher_:addEventListenerWithSceneGraphPriority(listener, self)
 
 	--注册添加角色掉到木板
@@ -106,15 +107,29 @@ function Hero:setAnimationEvent(event)
 		end
 end
 
-function Hero:dealTouch(touch, event)
-	local x = touch:getLocation().x
+function Hero:dealTouchBegan(touches, event)
+	print("dealTouchBegan~~~~~")
+	local x = touches[1]:getLocation().x
+	local y = touches[1]:getLocation().y
+	print(x,y)
 	--左侧就是跳跃，右侧是攻击
-	if x > display.width/2 then 		
+	if x > display.width/2 and y < display.cy then 		
 		self:Attack()
+	elseif x < display.width/2 and y > display.height/2 then 
+		GameFuc.setSpeedScale( 2 )
 	else
 		self:Jump()
 	end
-	return false
+	return true
+end
+
+function Hero:dealTouchMoved(touches, event)
+	
+
+end
+
+function Hero:dealTouchEnded(touch, event)
+	GameFuc.setSpeedScale( 1 )
 end
 
 function Hero:Attack()

@@ -94,3 +94,9 @@ function dispatchEvent(eventName)
 	local event = cc.EventCustom:new(eventName)
 	cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
 end
+
+--全局设置调度器速度
+function setSpeedScale( scale )
+	if not scale then return end
+	cc.Director:getInstance():getScheduler():setTimeScale(scale)
+end
