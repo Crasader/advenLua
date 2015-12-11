@@ -3,7 +3,7 @@ local GameCutScene = class("GameCutScene", function ()
 end)
 
 function GameCutScene:ctor(  )
-	local panel = require("app.Panel.GameCutPanel").new()
+	local panel = PanelManager.createGameCutPanel()
 	panel:setPosition(cc.p( display.cx /2, display.height ))
 	panel:setVisible(false)
 	self:addChild( panel, 1)
@@ -37,8 +37,6 @@ function GameCutScene:initWithTexture( tex )
 		self:setBg()
 		return 
 	end
-
-	
 	local bg = cc.Sprite:createWithTexture(tex)
 	self.bg = bg
 	self:addChild(bg)

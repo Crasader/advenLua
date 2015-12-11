@@ -40,5 +40,56 @@ end
 
 function setDifficulty(self, difficulty)
 	self.diffculty_ = difficulty
+	cc.UserDefault:getInstance():setIntegerForKey("Diffcuity", difficulty)
+end
+
+--获得玩家姓名
+function getPlayerName(self)
+	if not self.playerName_ then 
+		self.playerName_ = cc.UserDefault:getInstance():getStringForKey("Name", "abc")
+	end
+	return self.playerName_
+end
+
+--设置玩家名字
+function setPlayerName(self, name)
+	self.playerName_ = name
+	cc.UserDefault:getInstance():setStringForKey("Name", name)
+end
+
+--设置玩家性别
+function setPlayerSex(self, sex)
+	self.playerSex_ = sex
+	cc.UserDefault:getInstance():setIntegerForKey("Sex", key)
+end
+
+function getPlayerSex(self)
+	if not self.playerSex_ then
+		self.playerSex_ = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
+	end 
+	return self.playerSex_
+end
+
+--获得玩家最高分数
+function getHighScore(self)
+	if not self.highestScore_ then 
+		self.highestScore_ = cc.UserDefault:getInstance():getIntegerForKey("HighestScore", 0)
+	end
+	return self.highestScore_
+end
+
+function setHighScore(self, score)
+	self.highestScore_ = score
+	cc.UserDefault:getInstance():setIntegerForKey("HighestScore", score)
+end
+
+--保存玩家分数
+function setPlayerScore(self, score)
+	self.playerScore_ = score
+end
+
+--获取玩家分数
+function getPlayerScore(self)
+	return self.playerScore_
 end
 

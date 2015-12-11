@@ -24,15 +24,16 @@ function MenuScene:onEnter(  )
 end
 
 function MenuScene:isFirstPlay(  )
-	local name = cc.UserDefault:getInstance():getStringForKey("Name", "")
+	local name = UserDataManager.getInstance():getPlayerName()
 	if name ~= "" then 
 		return false
+
 	else return true
 	end
 end
 
 function MenuScene:showNamePanel(  )
-	local panel = require("app.Panel.NamePanel").new()
+	local panel = PanelManager.createNamePanel()
 	panel:setPosition(cc.p(display.cx/2, display.cy * 2))
 	self:addChild(panel)
 	panel:runAction(cc.MoveBy:create( 0.3, cc.p( 0,  - display.cy)))
@@ -46,10 +47,9 @@ function MenuScene:showNamePanel(  )
 		local name = textField:getString()
 
 		if name ~= "" then 
-			cc.UserDefault:getInstance():setStringForKey("Name", name)
+			UserDataManager.getInstance():setPlayerName(name)
 
 			local function goToNext(  )
-				
 				self:showDifferentSelect()	
 			end
 
@@ -63,7 +63,7 @@ end
 function MenuScene:showDifferentSelect(  )
 	self:removeAllChildren()
 
-	local panel = require("app.Panel.DiffcultPanel").new()
+	local panel = PanelManager.createDiffcutyPanel()
 	panel:setPosition(cc.p(display.cx/2, display.cy * 2))
 	local size = panel:getContentSize()
 	panel:runAction(cc.MoveBy:create(0.3,  cc.p(0, -display.cy * 2 + size.height )))

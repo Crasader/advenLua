@@ -10,6 +10,12 @@ function createStartScene()
 	return scene
 end
 
+--结算界面
+function createGameOverScene()
+	local scene = require("app.GameScene.GameOverScene").new()
+	return scene
+end
+
 function createMainMenuScene()
 	local scene = require("app.GameScene.MenuScene").new()
 	return scene

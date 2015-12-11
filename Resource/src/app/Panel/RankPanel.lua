@@ -23,7 +23,7 @@ function RankPanel:onEnter(  )
 end
 function RankPanel:initData(  )
 	--获得其的难度
-	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	self.diffculty = diffculty
 
 
@@ -32,9 +32,8 @@ function RankPanel:initData(  )
 end
 
 function RankPanel:createConnect(  )
-	local saveMgr = cc.UserDefault:getInstance()
-	local score  = saveMgr:getIntegerForKey("Score", 0)
-	local name = saveMgr:getStringForKey("Name", "AAA")
+	local score  = UserDataManager.getInstance():getPlayerScore()
+	local name = UserDataManager.getInstance():getPlayerName()
 
 	--生成json字符串
 	local tbl = {["Name"] = name, ["Score"] = score}

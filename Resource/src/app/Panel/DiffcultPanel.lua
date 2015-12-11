@@ -16,7 +16,7 @@ function DiffcultPanel:ctor(  )
 		--添加事件
 		local function onTouch( sender, eventType )
 			if eventType ~= ccui.TouchEventType.ended then return end
-			cc.UserDefault:getInstance():setIntegerForKey("Diffcuity", value)
+			UserDataManager.getInstance():setDifficulty(value)
 
 			local function GoToNext(  )
 				self:getToStart()

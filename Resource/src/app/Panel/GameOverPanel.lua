@@ -9,14 +9,12 @@ function GameOverPanel:ctor(  )
 	        self:onEnter()
 	    end
   	end
-
   	self:registerScriptHandler(onNodeEvent)
 end
 
 function GameOverPanel:initData(  )
-	local saveMgr = cc.UserDefault:getInstance()
-	local highScore = saveMgr:getIntegerForKey("HighestScore", 0)
-	local score  = saveMgr:getIntegerForKey("Score", 0)
+	local highScore = UserDataManager.getInstance():getHighScore()
+	local score  = UserDataManager.getInstance():getPlayerScore()
 
 	self.highScore = highScore
 	self.score = score
@@ -47,7 +45,7 @@ function GameOverPanel:onEnter(  )
 	
 	local function goFight( sender, eventType )
 		if eventType ~= ccui.TouchEventType.ended then return end
-		local scene = require("app.GameScene.MenuScene").new()	
+		local scene = SceneManager.createMainMenuScene()
 		cc.Director:getInstance():replaceScene(scene)
 	end
 

@@ -21,7 +21,7 @@ function SelectRolePanel:initData(  )
 			if eventType == ccui.TouchEventType.began then 
 				value:runAction( cc.ScaleTo:create(0.1,1.05))
 			end
-			cc.UserDefault:getInstance():setIntegerForKey("Sex", key)
+			UserDataManager.getInstance():setPlayerSex(key)
 
 			if eventType == ccui.TouchEventType.ended then 
 				local function GoToNext(  )
@@ -37,10 +37,8 @@ function SelectRolePanel:initData(  )
 end
 
 function SelectRolePanel:getToStart(  )
-	 -- local scene = require("app.GameScene.StartScene").new()
 	 --显示出第几关的场景
 	 local scene = SceneManager.createLevelScene()
-	 -- local scene = SceneManager.createStartScene()
 	cc.Director:getInstance():replaceScene(scene)
 end
 

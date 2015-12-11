@@ -126,10 +126,10 @@ function StartScene:initData(  )
 	self.index = 1
 	self:setDefalutRound()
 	--获得难度选择
-	local diffculty = UserDataManager:getInstance():getDifficulty()
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	self.diffculty = diffculty
 	--获得产生的角色的id
-	local heroID = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
+	local heroID = UserDataManager.getInstance():getPlayerSex()
 	self.heroId = heroID
 	self:retain()
 end
@@ -650,11 +650,11 @@ function StartScene:EnterGameOverScene( flagWin  )
 	self:saveScore()
 	--进入到结算场景
 	local function getInNext()
-		local scene = require("app.GameScene.GameOverScene").new()
+		local scene = SceneManager.createGameOverScene()
 		cc.Director:getInstance():replaceScene(scene)
 	end
 	if flagWin == false then 
-		local scene = require("app.GameScene.GameOverScene").new()
+		local scene = SceneManager.createGameOverScene()
 		local fadeIn = cc.TransitionFade:create(1,scene, cc.c3b(255, 0, 0) )
 		cc.Director:getInstance():replaceScene(fadeIn)
 	elseif flagWin == true then 
@@ -664,21 +664,15 @@ end
 
 function StartScene:SaveHighestScore(  )
 	--获得当前最高的数据
-	local saveMgr = cc.UserDefault:getInstance()
-	local highestKey = "HighestScore"
-	local hightScore = saveMgr:getIntegerForKey(highestKey)
+	local hightScore = UserDataManager.getInstance():getHighScore()
 	--大于就保存
 	if self.heroScore_ > hightScore then 
-		saveMgr:setIntegerForKey( highestKey,  self.heroScore_)
+		UserDataManager.getInstance():setHighScore( self.heroScore_ )
 	end
 end
 
 function StartScene:saveScore( )
-	local saveMgr = cc.UserDefault:getInstance()
-	local key = "Score"
-
-	--保存数据到下个场景展示
-	saveMgr:setIntegerForKey( key , self.heroScore_ )
+	UserDataManager.getInstance():setPlayerScore(self.heroScore_) 
 end
 
 return StartScene
