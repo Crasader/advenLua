@@ -88,6 +88,11 @@ function setPlayerScore(self, score)
 	self.playerScore_ = score
 end
 
+--增加玩家分数
+function addPlayerScore(self, score)
+	self.playerScore_ = self.playerScore_ + score
+end
+
 --获取玩家分数
 function getPlayerScore(self)
 	return self.playerScore_

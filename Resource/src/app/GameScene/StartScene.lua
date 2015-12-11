@@ -122,12 +122,10 @@ function StartScene:DealWithHeroDie()
 end
 
 function StartScene:initData(  )
-	self.heroScore_ = 0
+	--初始化分数
+	UserDataManager.getInstance():setPlayerScore(0)
 	self.index = 1
 	self:setDefalutRound()
-	--获得难度选择
-	local diffculty = UserDataManager.getInstance():getDifficulty()
-	self.diffculty = diffculty
 	--获得产生的角色的id
 	local heroID = UserDataManager.getInstance():getPlayerSex()
 	self.heroId = heroID
@@ -222,7 +220,6 @@ function StartScene:createHeroById( id )
 end
 
 function StartScene:createArmy(  )
-  	-- local index = self:getIndexOfWorld(self.heroScore_)
 	
 	--对应当前轮返回对应敌人的id
 	local armyId = self:getArmyId()
@@ -394,7 +391,8 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 			self.effect:Strike()
 
 			--设置被打飞的速度
-			local index = self:getIndexOfWorld(self.heroScore_)
+			local score = UserDataManager.getInstance():getPlayerScore()
+			local index = self:getIndexOfWorld( score )
 			self.index  = index 
 			local speed = Army001Speed[self.index]
 			bodyArmy:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
@@ -450,12 +448,13 @@ function StartScene:getDeltaHp( hurtId )
 	--默认返回10
 	if not hurtId then return 10 end
 	local hurtHp 
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	if hurtId == 1 then 
-		return HurtOfArmy001[self.diffculty]
+		return HurtOfArmy001[diffculty]
 	elseif hurtId == 2 then 
-		return HurtOfArmy002[self.diffculty]
+		return HurtOfArmy002[diffculty]
 	elseif hurtId == 3 then 
-		return HurtOfArmy003[self.diffculty]
+		return HurtOfArmy003[diffculty]
 	else
 		return 20
 	end
@@ -569,7 +568,7 @@ end
 
 function StartScene:getArmyCreateTime( index )
 	--这里可以根据难度不同敌人创建的时间也不同
-	local diffculty = self.diffculty
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	if diffculty == 1 then 
 		return World1ArmyCreateTimeEasy[index]
 	elseif diffculty == 2 then 
@@ -580,12 +579,13 @@ function StartScene:getArmyCreateTime( index )
 end
 
 function StartScene:setScore(  )
-	self.score:setScore(self.heroScore_)
+	local score = UserDataManager.getInstance():getPlayerScore()
+	self.score:setScore(score)
 end
 
 function StartScene:defeatArmy( id )
 	local deltaScore = self:getDeltaScore(id)
-	self.heroScore_ = self.heroScore_ + deltaScore
+	UserDataManager.getInstance():addPlayerScore(deltaScore)
 	self:setScore()
 end
 
@@ -595,14 +595,12 @@ end
 
 function StartScene:getIndexOfWorld( score )
 	local worldSeting = self:getWorldSetting()
-	local diffculty = self.diffculty
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	local lengthOfSetting =  #worldSeting
 	for index = 1 , lengthOfSetting do
 		if score <= worldSeting[index] then 
 			if diffculty == 1 then 
-
 				return index
-
 			elseif diffculty == 2 then 
 				local lastIndex = index + 2
 				--如果未到最后就返回这个
@@ -625,7 +623,7 @@ function StartScene:getIndexOfWorld( score )
 end
 
 function StartScene:getWorldSetting(  )
-	local diffculty = self.diffculty
+	local diffculty = UserDataManager.getInstance():getDifficulty()
 	--对应简单难度
 	if diffculty == 1 then 
 
@@ -647,7 +645,6 @@ end
 function StartScene:EnterGameOverScene( flagWin  )
 	--有没有超过记录
 	self:SaveHighestScore()
-	self:saveScore()
 	--进入到结算场景
 	local function getInNext()
 		local scene = SceneManager.createGameOverScene()
@@ -666,13 +663,10 @@ function StartScene:SaveHighestScore(  )
 	--获得当前最高的数据
 	local hightScore = UserDataManager.getInstance():getHighScore()
 	--大于就保存
-	if self.heroScore_ > hightScore then 
-		UserDataManager.getInstance():setHighScore( self.heroScore_ )
+	local playerScore = UserDataManager.getInstance():getPlayerScore()
+	if playerScore > hightScore then 
+		UserDataManager.getInstance():setHighScore( playerScore )
 	end
-end
-
-function StartScene:saveScore( )
-	UserDataManager.getInstance():setPlayerScore(self.heroScore_) 
 end
 
 return StartScene
