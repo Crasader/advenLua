@@ -52,4 +52,6 @@ require "app.models.AudioManager"
 require "app.models.ObjectManager"
 --载入玩家数据管理者
 require "app.models.UserDataManager"
+--敌人数据管理者
+require "app.models.ArmyManager"
 

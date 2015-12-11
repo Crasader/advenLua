@@ -164,18 +164,19 @@ ArmyScore = {
 }
 
 ArmyInRound = {
-	[1] = 5,
-	[2] = nil,
-	[3] = 5,
-	[4] = nil,
+	[1] = 20,
+	[2] = 30,
+	[3] = nil,
+	[4] = 50,
+	[5] = nil,
+	[6] = 70,
+	[7] = 100,
 }
 
 BossInRound = {
-	[2] = 1,
-	[4] = 1,
+	[3] = 1,
+	[5] = 1,
+	[8] = 1,
 }
 
-
-NumOfAllArmy001 = 30
-
-WORLD_ONE_ROUND_NUM = 4
+WORLD_ONE_ROUND_NUM = 8

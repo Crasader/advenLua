@@ -126,9 +126,6 @@ function StartScene:initData(  )
 	UserDataManager.getInstance():setPlayerScore(0)
 	self.index = 1
 	self:setDefalutRound()
-	--获得产生的角色的id
-	local heroID = UserDataManager.getInstance():getPlayerSex()
-	self.heroId = heroID
 	self:retain()
 end
 
@@ -194,7 +191,8 @@ function StartScene:addMainCharacter(  )
 	wall:setPosition(cc.p(display.cx, display.height +  275/2 ))
 	self.Layer:addChild(wall,20)
 
-	self.hero = self:createHeroById(self.heroId )
+	local sex = UserDataManager.getInstance():getPlayerSex()
+	self.hero = self:createHeroById(sex )
 	self.hero:setPosition(cc.p(display.cx/2, 275 ))
 	--最后才设置位置
 	self.Layer:addChild(self.hero,10)
@@ -203,7 +201,6 @@ function StartScene:addMainCharacter(  )
 	local x,y = self.hero:getPosition()
 	local cameraControl = ObjectManager.createCameraControl(self:getDefaultCamera(), cc.p(x,y))
 	self:addChild(cameraControl)
-
 end
 
 --更新UI
@@ -397,13 +394,13 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 			local speed = Army001Speed[self.index]
 			bodyArmy:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
 			--打击敌人的处理
-			self:defeatArmy(bodyArmy.typeId)
+			self:defeatArmy(bodyArmy:getScore())
 			bodyArmy:playDefeatEffect()
 
 			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
 				cc.RemoveSelf:create(false)))
 		else
-			armyId = bodyArmy.typeId
+			armyId = bodyArmy:getId()
 			showHeroInjure( armyId)
 		end
 
@@ -585,14 +582,10 @@ function StartScene:setScore(  )
 	self.score:setScore(score)
 end
 
-function StartScene:defeatArmy( id )
-	local deltaScore = self:getDeltaScore(id)
+function StartScene:defeatArmy( score )
+	local deltaScore = score or 0
 	UserDataManager.getInstance():addPlayerScore(deltaScore)
 	self:setScore()
-end
-
-function StartScene:getDeltaScore( id )
-	return ArmyScore[id]
 end
 
 function StartScene:getIndexOfWorld( score )

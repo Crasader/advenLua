@@ -20,8 +20,27 @@ function NormalArmy:initData()
 	--设置随机数
 	math.randomseed(os.time())
 	local id = self.fileTbl.id
-	self.typeId = id
+	self:setId(id)
+
+	local score = ArmyScore[id]
+	self.setScore(score)
 	self:setTag(const.NORMAL_ARMY)
+end
+
+function NormalArmy:getId()
+	return self.typeId
+end
+
+function NormalArmy:setId(id)
+	self.typeId = id
+end
+
+function NormalArmy:setScore( score )
+	self.needScore = score
+end
+
+function NormalArmy:getScore()
+	return self.needScore
 end
 --视图有关
 function NormalArmy:initWidget()
