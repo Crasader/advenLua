@@ -31,7 +31,6 @@ function CameraControler:MoveBgView()
 	GameFuc.dispatchEvent( EventConst.SCROLL_VIEW)
 end
 
-
 function CameraControler:init()
 	self.mainCamera:initPerspective( 45, display.width/display.height, 10, 10000 )
 	self.mainCamera:setPositionZ(0.1)

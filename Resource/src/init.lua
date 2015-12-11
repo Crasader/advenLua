@@ -7,18 +7,19 @@ require "app.Data.LoadingData"
 require "app.const"
 --载入事件用常量
 require "app.EventConst"
+--加载敌人出现的速度
+require "app.Data.ArmySpeed"
+--加载关卡设置
+require "app.Data.World1"
+--加载敌人配置
+require "app.Data.NormalArmyData"
+
 --载入常用函数
 require "app.GameFuc"
 --载入常用的UI函数
 require "app.UIFunc"
---加载敌人出现的速度
-require "app.Data.ArmySpeed"
-
---加载关卡设置
-require "app.Data.World1"
-
---加载敌人配置
-require "app.Data.NormalArmyData"
+--载入地图关卡用的函数
+require "app.LevelFuc"
 
 --加载敌人生产工厂
 require("app.models.ArmyFactory")

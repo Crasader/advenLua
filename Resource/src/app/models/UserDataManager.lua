@@ -19,6 +19,7 @@ end
 
 function init( self )
 	self:setMapLevel(1)
+	self:setMapRound(1)
 end
 
 --设置关卡
@@ -28,6 +29,25 @@ end
 
 function getMapLevel(self)
 	return self.mapLevel_
+end
+
+--前进一关
+function addMapLevel(self)
+	self.mapLevel_ = self.mapLevel_ + 1
+end
+
+--设置当前玩家的轮数
+function setMapRound(self, round)
+	self.mapRound_ = round
+end
+
+function getMapRound(self)
+	return self.mapRound_
+end
+
+--前进一轮
+function addMapRound(self)
+	self.mapRound_ =  self.mapRound_ + 1
 end
 
 --获得难度
@@ -97,4 +117,6 @@ end
 function getPlayerScore(self)
 	return self.playerScore_
 end
+
+
 

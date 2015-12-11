@@ -286,17 +286,17 @@ end
 
 --设置轮数
 function StartScene:setRound( num )
-	self.round_ = num
+	UserDataManager.getInstance():setMapRound( num )
 end
 
 --递增轮数
 function StartScene:addRound()
-	self.round_ = self.round_ + 1
+	UserDataManager.getInstance():addMapRound()
 end
 
 --获得当前轮数
 function StartScene:getRound()
-	return self.round_
+	return UserDataManager.getInstance():getMapRound()
 end
 
 --是否是最后一轮
@@ -484,7 +484,9 @@ function StartScene:getArmyInRound(round)
 end
 
 function StartScene:getAllRound()
-	return WORLD_ONE_ROUND_NUM
+	local level = UserDataManager.getInstance():getMapLevel()
+	local round = LevelFuc.getAllRound(level)
+	return round
 end
 
 function StartScene:setArmyNum( num )
