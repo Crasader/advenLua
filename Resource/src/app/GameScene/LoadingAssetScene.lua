@@ -69,6 +69,7 @@ function LoadingAssetScene:loadingAsset(  )
 		end
 	end
 
+	UserDataManager.getInstance()
 	return true
 end
 

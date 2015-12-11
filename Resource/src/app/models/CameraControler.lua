@@ -8,12 +8,27 @@ function CameraControler:ctor( camera , heroPosition)
 	local x,y = self.mainCamera:getPosition()
 	self.originPosition = cc.p(x,y)
 	self:init()
+	self:addEvent()
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
 	    end
   	end
   	self:registerScriptHandler(onNodeEvent)
+end
+
+function CameraControler:addEvent()
+	local eventListener = cc.EventListenerCustom:create(EventConst.SCROLL_VIEW, handler(self, self.playMoveAction))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(eventListener, self)
+
+	local eventListenerArmyDie = cc.EventListenerCustom:create(EventConst.ALL_DIE, handler(self, self.MoveBgView))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(eventListenerArmyDie, self)
+end
+
+--移动摄像机
+function CameraControler:MoveBgView()
+	--发送事件移动摄像机
+	GameFuc.dispatchEvent( EventConst.SCROLL_VIEW)
 end
 
 
@@ -25,6 +40,8 @@ function CameraControler:init()
 	--添加控制UI的Camera
 	self:addUICamera()
 	self:runAllCameraInAction()
+
+	self:setIsCanMove( true)
 end
 
 function CameraControler:addMapCamera()
@@ -49,6 +66,7 @@ function CameraControler:createCamera( cameraFlag )
 end
 
 function CameraControler:onEnter()
+
 end
 
 function CameraControler:runAllCameraInAction()
@@ -59,18 +77,42 @@ function CameraControler:runAllCameraInAction()
 	self.mainCamera:runAction( cc.Spawn:create( act1, act2 )) 
 
 	local mapAct1 = cc.MoveBy:create(0.8, cc.vec3(0, 0, display.height)) 
-	local mapAct2 = cc.MoveBy:create(5, cc.p(display.width, 0))
+	
 	self.mapCamera:runAction( mapAct1 )
 
-	local function dispatchMapEvent()
-		local event = cc.EventCustom:new(EventConst.CHANGE_MAP)
-		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
-	end
-
-	local mapAct3 = cc.Sequence:create(cc.DelayTime:create(40), mapAct2, cc.CallFunc:create(dispatchMapEvent))
-	self.mapCamera:runAction(cc.RepeatForever:create(mapAct3))
+	
 	self.uiCamera:setPositionZ(display.height * 1.2)
 end
 
+function CameraControler:playMoveAction()
+
+	--派发设置下个背景的事件
+	local function dispatchMapEvent()
+		local event = cc.EventCustom:new(EventConst.CHANGE_MAP)
+		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
+		self:setIsCanMove( true)
+	end
+
+	--派发继续创建怪物的事件
+	local function dispatchContinuePKEvent()
+		local event = cc.EventCustom:new(EventConst.NEXT_ROUND)
+		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
+	end
+
+	local mapAct2 = cc.MoveBy:create(5, cc.p(display.width, 0))
+	local act = cc.Sequence:create( mapAct2, cc.CallFunc:create(dispatchMapEvent), cc.CallFunc:create(dispatchContinuePKEvent))
+	if self:isCanMoveView() then
+		self:setIsCanMove( false)
+		self.mapCamera:runAction(act)
+	end
+end
+
+function CameraControler:setIsCanMove( isMove )
+	self.isCanMoveCamera_  = isMove
+end
+
+function CameraControler:isCanMoveView()
+	return self.isCanMoveCamera_ 
+end
 
 return CameraControler

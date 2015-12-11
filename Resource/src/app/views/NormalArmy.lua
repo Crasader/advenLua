@@ -29,8 +29,6 @@ function NormalArmy:initWidget()
 	self.body = self:getChildByName( bodyName )
 	self:getChildByName(bodyName):setFlippedX(true)
 
-	local act =  BloomUp:create(1, 0.0, 0.3)
-	self.body:runAction(cc.RepeatForever:create(cc.Sequence:create(act, act:reverse())))
 	--设置怪物的大小
 	local height = display.height
 	local width = display.width

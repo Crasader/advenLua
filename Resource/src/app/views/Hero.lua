@@ -21,11 +21,6 @@ end
 
 function Hero:init()
 	self:addEvent()
-
-	self.act = BloomUp:create(1, 0.0, 0.2, true)
-
-	self:runAction(cc.RepeatForever:create(cc.Sequence:create(self.act, self.act:reverse())))
-	
 end
 
 function Hero:initData(  )

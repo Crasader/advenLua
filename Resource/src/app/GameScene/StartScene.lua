@@ -9,7 +9,6 @@ function StartScene:ctor(  )
 	self:addUI()
 	self:addMainCharacter()
 	self:addPhysicsEvent()
-	self:createArmySomeTimeLater()
 	self:createGameCutScene()
 	self:addEvent()
 
@@ -29,6 +28,7 @@ function StartScene:onEnter(  )
 		AudioEngine.resumeMusic()
 	end
 	self:updateUI()
+	self:createArmySomeTimeLater()
 end
 
 function StartScene:onExit()
@@ -76,6 +76,11 @@ function StartScene:addEvent(  )
 	local gameResumeEvent = cc.EventListenerCustom:create( EventConst.GAME_RESUME, handler(self, self.DealWithResume) )
 
 	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(gameResumeEvent, self)
+
+	--下一轮的事件
+	local nextRoundEvent = cc.EventListenerCustom:create( EventConst.NEXT_ROUND, handler(self, self.setNextRound) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(nextRoundEvent, self)
 end
 
 function StartScene:DealWithResume()
@@ -101,8 +106,16 @@ function StartScene:DealWithGamecut(  )
 end
 
 function StartScene:DealWithBossDie()
-	self:EnterGameOverScene( true )	
+	self.boss = nil
+	--是否是最后一轮，是就进入结算界面
+	if self:isAllRound() then 
+		self:EnterGameOverScene( true )	
+	else
+		--派发全部敌人死亡，进入下一轮
+		self:dispatchAllArmyDie()
+	end
 end
+
 
 function StartScene:DealWithHeroDie()
 	self:EnterGameOverScene( false )	
@@ -111,14 +124,20 @@ end
 function StartScene:initData(  )
 	self.heroScore_ = 0
 	self.index = 1
-	self.armyNum =  0
+	self:setDefalutRound()
 	--获得难度选择
-	local diffculty = cc.UserDefault:getInstance():getIntegerForKey("Diffcuity", 1)
+	local diffculty = UserDataManager:getInstance():getDifficulty()
 	self.diffculty = diffculty
 	--获得产生的角色的id
 	local heroID = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
 	self.heroId = heroID
 	self:retain()
+end
+
+function StartScene:setDefalutRound()
+	self:setRound(1)
+	local armyNum = self:getArmyInRound(1)
+	self:setArmyNum(armyNum)
 end
 
 function StartScene:addUI(  )
@@ -205,10 +224,10 @@ end
 function StartScene:createArmy(  )
   	-- local index = self:getIndexOfWorld(self.heroScore_)
 	
-	--随机生成怪物
-	local armyId = math.random(1, 3)
+	--对应当前轮返回对应敌人的id
+	local armyId = self:getArmyId()
 	local army = ArmyFactory.createArmyById(armyId)
-	self.armyNum = self.armyNum + 1
+	self:setArmyNum(self:getArmyNum() - 1)
 	army:setTag(const.NORMAL_ARMY)
   	army:Walk()
   	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
@@ -220,15 +239,77 @@ function StartScene:createArmy(  )
   	army:setSpeed(speed)
 end
 
+function StartScene:getArmyId()
+	local round = self:getRound()
+	local id =self:getArmyIdFromRound(round)
+	return id
+end
+
+function StartScene:getArmyIdFromRound( round ) 
+	if round == 1 then 
+		return math.random(1, 2)
+	elseif round == 2 then 
+		return math.random(2, 3)
+	else
+		return math.random(1, 3)
+	end
+end
+
 function StartScene:createBoss(  )
 	if not self.boss then 
-		local boss = ArmyFactory.createBoss(1)
+		local bossId = self:getBossId()
+		local boss = ArmyFactory.createBoss(bossId)
 	  	boss:commIntoGame()
 	  	boss:setPosition(cc.p(display.cx* 2.5, 275/2+ 180))
 	  	boss:setPhysics()
 	  	self.Layer:addChild(boss,10)
 	  	self.boss = boss
-		  	--这里应该根据一个表来设置速度
+		--这里应该根据一个表来设置速度
+	end
+end
+
+--获得boss的id
+function StartScene:getBossId()
+	local round = self:getRound()
+	local id = self:getBossIdFromRound( round )
+	return id
+end
+
+--通过当前轮获得boss的id
+function StartScene:getBossIdFromRound(round)
+	if not round then return end
+	return BossInRound[round]
+end
+
+--派发全部怪物死掉
+function StartScene:dispatchAllArmyDie()
+	GameFuc.dispatchEvent( EventConst.ALL_DIE)
+	self:addRound()
+end
+
+--设置轮数
+function StartScene:setRound( num )
+	self.round_ = num
+end
+
+--递增轮数
+function StartScene:addRound()
+	self.round_ = self.round_ + 1
+end
+
+--获得当前轮数
+function StartScene:getRound()
+	return self.round_
+end
+
+--是否是最后一轮
+function StartScene:isAllRound()
+	local allRound = self:getAllRound()
+	local round = self:getRound()
+	if allRound <= round then 
+		return true
+	else
+		return false
 	end
 end
 
@@ -243,10 +324,10 @@ function StartScene:getSpeedTbl( id )
 end
 
 function StartScene:isNeedCreateArmy(  )
-	if self.armyNum <= 50 then 
-		return true
-	else 
+	if self:getArmyNum() <= 0 then 
 		return false
+	else 
+		return true
 	end
 end
 
@@ -320,6 +401,7 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 			--打击敌人的处理
 			self:defeatArmy(bodyArmy.typeId)
 			bodyArmy:playDefeatEffect()
+
 			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
 				cc.RemoveSelf:create(false)))
 		else
@@ -379,6 +461,42 @@ function StartScene:getDeltaHp( hurtId )
 	end
 end
 
+--下一轮的事件
+function StartScene:setNextRound()
+	local round = self:getRound()
+	local allRound = self:getAllRound()
+	if round < allRound then 
+		local armyNum = self:getArmyInRound(round)
+		if armyNum then 
+			self:setArmyNum(armyNum)
+			self:createArmySomeTimeLater()
+		else
+			self:createBoss()
+		end
+	else
+		self:createBoss()
+	end
+end
+
+--获得当前轮敌人出现的个数
+function StartScene:getArmyInRound(round)
+	if not round then round = 1 end
+	return ArmyInRound[round]
+end
+
+function StartScene:getAllRound()
+	return WORLD_ONE_ROUND_NUM
+end
+
+function StartScene:setArmyNum( num )
+	if not num then return end
+	self.armyNum = num
+end
+
+function StartScene:getArmyNum()
+	return self.armyNum
+end
+
 function StartScene:createArmySomeTimeLater(  )
 	local time = 0
 	local cleanTime = 0
@@ -393,18 +511,25 @@ function StartScene:createArmySomeTimeLater(  )
 				self:createArmy()
 				time = 0
 			end
-		else 
-			self:createBoss()
 		end
-
 		--每秒清除一次
 		if cleanTime >= 1 then 
 			cleanTime = 0
 			self:cleanOutWindowArmy()
+			--全部小怪死亡后移动背景
+			if self:isAllArmyDie()  then 
+				self:dispatchAllArmyDie()
+				GameFuc.unSetUpdate(self.armyCreateHandler)
+				self.armyCreateHandler = nil
+			end
 		end
 	end
-	self.numUpdate = update
-	self:scheduleUpdateWithPriorityLua(update, 0)
+	--如果已经有了这个计时器就先取消再开启
+	if self.armyCreateHandler then 
+		GameFuc.unSetUpdate(self.armyCreateHandler)
+		self.armyCreateHandler = nil
+	end
+	self.armyCreateHandler = GameFuc.setUpdate(update, 0.1, false )
 end
 
 --清除在界面外面的敌人
@@ -416,6 +541,29 @@ function StartScene:cleanOutWindowArmy()
 				army:removeFromParent()
 			end
 		end
+	end
+end
+
+--判断是否全部敌人死亡
+function StartScene:isAllArmyDie()
+	if self:getArmyNum() > 0 then 
+		return false
+	end
+
+	local armys = self.Layer:getChildren()
+	local sum = 0
+	for c, army in pairs (armys) do
+		if army then 
+			if army:getTag() == const.NORMAL_ARMY then 
+				sum = sum + 1
+			end
+		end
+	end
+
+	if sum > 0 then 
+		return false
+	else
+		return true
 	end
 end
 

@@ -38,7 +38,9 @@ end
 
 function SelectRolePanel:getToStart(  )
 	 -- local scene = require("app.GameScene.StartScene").new()
-	 local scene = SceneManager.createStartScene()
+	 --显示出第几关的场景
+	 local scene = SceneManager.createLevelScene()
+	 -- local scene = SceneManager.createStartScene()
 	cc.Director:getInstance():replaceScene(scene)
 end
 

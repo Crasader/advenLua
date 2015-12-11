@@ -49,4 +49,6 @@ require "app.models.PanelManager"
 require "app.models.AudioManager"
 --载入对象管理者
 require "app.models.ObjectManager"
+--载入玩家数据管理者
+require "app.models.UserDataManager"
 

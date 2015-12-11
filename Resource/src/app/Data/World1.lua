@@ -163,4 +163,19 @@ ArmyScore = {
 	[1] = 250, [2] = 150, [3] = 100
 }
 
+ArmyInRound = {
+	[1] = 5,
+	[2] = nil,
+	[3] = 5,
+	[4] = nil,
+}
+
+BossInRound = {
+	[2] = 1,
+	[4] = 1,
+}
+
+
 NumOfAllArmy001 = 30
+
+WORLD_ONE_ROUND_NUM = 4

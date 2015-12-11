@@ -100,3 +100,13 @@ function setSpeedScale( scale )
 	if not scale then return end
 	cc.Director:getInstance():getScheduler():setTimeScale(scale)
 end
+
+--添加update函数
+function setUpdate(hand, time , isPause)
+	return cc.Director:getInstance():getScheduler():scheduleScriptFunc(hand, time, isPause )
+end
+
+--取消update函数
+function unSetUpdate( id)
+	cc.Director:getInstance():getScheduler():unscheduleScriptEntry(id)
+end

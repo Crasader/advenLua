@@ -20,3 +20,9 @@ function createLoadingScene()
 	local scene = require("app.GameScene.LoadingAssetScene").new()
 	return scene
 end
+
+--显示关卡的场景
+function createLevelScene()
+	local scene = require("app.GameScene.LevelShowScene").new()
+	return scene
+end
