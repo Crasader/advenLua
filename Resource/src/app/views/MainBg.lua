@@ -1,5 +1,5 @@
-local MainBg = class("MainBg", function (  )
-	return cc.CSLoader:createNode("Level/Level1.csb")
+local MainBg = class("MainBg", function ( fileName )
+	return cc.CSLoader:createNode(fileName)
 end)
 
 function MainBg:ctor(  )

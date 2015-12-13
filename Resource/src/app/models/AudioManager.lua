@@ -19,3 +19,15 @@ end
 function playArmyDieEffect()
 	AudioEngine.playEffect("music/effect/monster_die_fire.mp3", false)
 end
+
+function stop()
+	AudioEngine.stopMusic()
+end
+
+function setVolDown(  )
+	AudioEngine.setMusicVolume( 0.3)
+end
+
+function setDefault()
+	AudioEngine.setMusicVolume(1.0)
+end

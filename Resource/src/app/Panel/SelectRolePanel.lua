@@ -38,8 +38,7 @@ end
 
 function SelectRolePanel:getToStart(  )
 	 --显示出第几关的场景
-	 local scene = SceneManager.createLevelScene()
-	cc.Director:getInstance():replaceScene(scene)
+	 SceneManager.getInLevelScene()
 end
 
 return SelectRolePanel

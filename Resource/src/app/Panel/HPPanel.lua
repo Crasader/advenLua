@@ -8,9 +8,7 @@ function HPPanel:ctor()
 end
 
 function HPPanel:initData()
-
 	self.heroHpBar = self:getChildByName("HP")
-
 end
 
 --设置血条值

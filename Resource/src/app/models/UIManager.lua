@@ -20,3 +20,10 @@ function createScorePanel()
 	panel:setCameraMask(cc.CameraFlag.USER2)
 	return panel
 end
+
+--创建时间
+function createTimePanel()
+	local panel = require("app.Panel.TimePanel").new()
+	panel:setCameraMask(cc.CameraFlag.USER2)
+	return panel
+end

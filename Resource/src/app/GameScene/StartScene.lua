@@ -9,7 +9,6 @@ function StartScene:ctor(  )
 	self:addUI()
 	self:addMainCharacter()
 	self:addPhysicsEvent()
-	self:createGameCutScene()
 	self:addEvent()
 
 	local function onNodeEvent(event)
@@ -24,9 +23,7 @@ function StartScene:ctor(  )
 end
 
 function StartScene:onEnter(  )
-	if not AudioEngine.isMusicPlaying() then 
-		AudioEngine.resumeMusic()
-	end
+	AudioManager.setDefault()
 	self:updateUI()
 	self:createArmySomeTimeLater()
 end
@@ -35,14 +32,10 @@ function StartScene:onExit()
 	GameFuc.setSpeedScale(1)
 end
 
-function StartScene:createGameCutScene()
-	self.gamecutScene = SceneManager.createGameCutScene()
-	self.gamecutScene:retain()
-end
-
 function StartScene:DealWithBossShoot(  )
 	--创建子弹
-	local bullet = EffectFactory.createBossFire()
+	local id = math.random(1,3)
+	local bullet = EffectFactory.createBossFire( id )
 	self.Layer:addChild(bullet)
 	bullet:setPosition(display.width, display.cy)
 	bullet:setSpeed({x= -500, y= 0})
@@ -88,43 +81,61 @@ function StartScene:DealWithResume()
 end
 
 function StartScene:DealWithGamecut(  )
-	if self.gamecutScene then 
-		AudioEngine.pauseMusic()
-
-		local rendTex = self.rendTex
-		if not rendTex then 
-			rendTex = cc.RenderTexture:create(display.width, display.height)
-			rendTex:retain()
-			self.rendTex = rendTex
-		end
-		rendTex:beginWithClear(0, 0, 0, 1.0)
-		self.Layer:visit()
-		rendTex:endToLua()
-		self.gamecutScene:initWithTexture(rendTex:getSprite():getTexture())
-		cc.Director:getInstance():pushScene(self.gamecutScene)
-	end
+	
 end
 
 function StartScene:DealWithBossDie()
 	self.boss = nil
 	--是否是最后一轮，是就进入结算界面
 	if self:isAllRound() then 
-		self:EnterGameOverScene( true )	
+		--如果是最后一关
+		self:getInNextScene()
 	else
 		--派发全部敌人死亡，进入下一轮
 		self:dispatchAllArmyDie()
 	end
 end
 
+function StartScene:getInNextScene()
+	local function enterResult()
+		if UserDataManager.getInstance():getMapLevel() >= GameConst.MAX_MAP_LEVEL then 
+			self:EnterResultScene( false )
+		else
+			self:EnterResultScene( true )	
+		end
+	end
+
+	--降低音量
+	AudioManager.setVolDown()
+	self.hero:Walk()
+	local act = cc.Sequence:create( cc.MoveBy:create(5, cc.p(display.width, 0)), cc.CallFunc:create(enterResult) )
+	self.hero:runAction( act )
+
+end
+
 
 function StartScene:DealWithHeroDie()
-	self:EnterGameOverScene( false )	
+	local function goNext()
+		--如果还有生命就重新开始这个关卡
+		UserDataManager.getInstance():subLife()
+		if UserDataManager.getInstance():getLife() >= 0 then 
+			self:EnterResultScene( false )	
+		else
+			self:EnterGameOverScene( )
+		end
+	end
+
+	local act = cc.Sequence:create(cc.DelayTime:create(3), cc.CallFunc:create(goNext))
+	self:runAction(act)
+	self.hero:Die()
+end
+
+function StartScene:EnterGameOverScene()
+	SceneManager.getInOverScene()
 end
 
 function StartScene:initData(  )
 	--初始化分数
-	UserDataManager.getInstance():setPlayerScore(0)
-	self.index = 1
 	self:setDefalutRound()
 	self:retain()
 end
@@ -141,8 +152,8 @@ function StartScene:addUI(  )
 	self:addChild(layer)
 	self.Layer = layer
 	--add Back
-	local backGround = LevelFactory.createLavel1()
-	local backGround2 = LevelFactory.createLavel1()
+	local backGround = LevelManager.getLevel()
+	local backGround2 = LevelManager.getLevel()
 	self.Layer:addChild(backGround)
 	self.Layer:addChild(backGround2)
 	--控制背景层
@@ -169,6 +180,12 @@ function StartScene:addUI(  )
 	self.score = scoreNode
 	self:setScore()
 
+	--addTime 
+	local timeNode = UIManager.createTimePanel()
+	timeNode:setPosition(cc.p(display.width - 260, display.height - 16 ))
+	self.Layer:addChild(timeNode, 20)
+	self.timeNode = timeNode
+
 	--add Effect
 	local effect = EffectFactory.createNorAttackEffect()
 	effect:setVisible(false)
@@ -182,7 +199,7 @@ end
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
 	physicsWorld:setGravity(cc.p(0,-500))
-	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
@@ -206,6 +223,7 @@ end
 --更新UI
 function StartScene:updateUI()
 	self.hpWidget:setHp(self.hero:getHp())
+	self:setScore()
 end
 
 function StartScene:createHeroById( id )
@@ -220,33 +238,30 @@ function StartScene:createArmy(  )
 	
 	--对应当前轮返回对应敌人的id
 	local armyId = self:getArmyId()
-	local army = ArmyFactory.createArmyById(armyId)
+	local army = ArmyManager.getArmyById(armyId)
 	self:setArmyNum(self:getArmyNum() - 1)
 	army:setTag(const.NORMAL_ARMY)
   	army:Walk()
   	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
   	army:setPhysics()
   	self.Layer:addChild(army,10)
-  	--这里应该根据一个表来设置速度
-  	local speedTbl = self:getSpeedTbl(armyId)
-  	local speed = speedTbl[self.index]
+
+  	local speed = ArmyManager.getSpeed(armyId)
   	army:setSpeed(speed)
 end
 
 function StartScene:getArmyId()
 	local round = self:getRound()
+	--根据索引获得对应的怪物id
 	local id =self:getArmyIdFromRound(round)
 	return id
 end
 
 function StartScene:getArmyIdFromRound( round ) 
-	if round == 1 then 
-		return math.random(1, 2)
-	elseif round == 2 then 
-		return math.random(2, 3)
-	else
-		return math.random(1, 3)
-	end
+	--获得当前关卡的所有怪物索引数据
+	local allArmy = ArmyManager.getAllArmy()
+	--随机得到一个
+	return allArmy[math.random(1, #allArmy)]
 end
 
 function StartScene:createBoss(  )
@@ -272,7 +287,7 @@ end
 --通过当前轮获得boss的id
 function StartScene:getBossIdFromRound(round)
 	if not round then return end
-	return BossInRound[round]
+	return ArmyManager.getBossInRound(round)
 end
 
 --派发全部怪物死掉
@@ -304,16 +319,6 @@ function StartScene:isAllRound()
 		return true
 	else
 		return false
-	end
-end
-
-function StartScene:getSpeedTbl( id )
-	if id == 1 then 
-		return Army001Speed
-	elseif id == 2 then 
-		return Army002Speed
-	elseif id == 3 then 
-		return Army003Speed
 	end
 end
 
@@ -352,6 +357,9 @@ function StartScene:addPhysicsEvent(  )
 			return false
 		elseif GameFuc.isBulletContactWithArmy( spriteA, spriteB ) then 
 			return false
+		--子弹与子弹不进行碰撞模拟
+		elseif GameFuc.isBulletContactWithBullet(spriteA , spriteB) then 
+			return false
 		else
 			return true
 		end
@@ -370,8 +378,7 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		self.hero:MinitesHp(deltaHp)
 		if self.hero:getHp() <= 0 then
 			--停止缓慢低地弹出游戏
-			local event =  cc.EventCustom:new(EventConst.HERO_DIE)
-			cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
+			GameFuc.dispatchEvent( EventConst.HERO_DIE )
 		end
 		if self.hpWidget then 
 			self.hpWidget:setHp(self.hero:getHp() )
@@ -383,18 +390,19 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		--确定第一个为主角
 		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
 		local bodyArmy = GameFuc.getNormalArmy( spriteA, spriteB )
-		if self.hero:getState() == "ATTACK" or self.hero:getState() == "AIRATTACK" then
+		if self.hero:getState() == const.HERO_ATTACK or self.hero:getState() == const.HERO_AIRATTACK then
 			self.effect:setPosition(cc.p(bodyArmy:getPositionX() -20, bodyArmy:getPositionY()))
 			self.effect:Strike()
 
 			--设置被打飞的速度
 			local score = UserDataManager.getInstance():getPlayerScore()
-			local index = self:getIndexOfWorld( score )
-			self.index  = index 
-			local speed = Army001Speed[self.index]
+			local speed = ArmyManager.getSpeed(bodyArmy:getId())
 			bodyArmy:getPhysicsBody():setVelocity(cc.p(speed.outX,speed.outY))
 			--打击敌人的处理
-			self:defeatArmy(bodyArmy:getScore())
+			--先计算出应该获得的分数
+			local score = GameFuc.getNeedScore(bodyArmy:getScore())
+			local recoverHp = GameFuc.getRecoverHp(bodyArmy:getRecoverHp())
+			self:defeatArmy( score , recoverHp )
 			bodyArmy:playDefeatEffect()
 
 			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
@@ -412,7 +420,7 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 		local bodyHero = GameFuc.getHero( spriteA, spriteB ) 
 		local bodyBullet = GameFuc.getBullet( spriteA, spriteB )
 		--如果角色是攻击状态就返回
-		if self.hero:getState() == "ATTACK" or self.hero:getState() == "AIRATTACK" then
+		if self.hero:getState() == const.HERO_ATTACK or self.hero:getState() == const.HERO_AIRATTACK then
 			bodyBullet:reverseSpeed()
 		else
 			armyId = bodyBullet.typeId
@@ -444,24 +452,15 @@ end
 function StartScene:getDeltaHp( hurtId )
 	--默认返回10
 	if not hurtId then return 10 end
-	local hurtHp 
-	local diffculty = UserDataManager.getInstance():getDifficulty()
-	if hurtId == 1 then 
-		return HurtOfArmy001[diffculty]
-	elseif hurtId == 2 then 
-		return HurtOfArmy002[diffculty]
-	elseif hurtId == 3 then 
-		return HurtOfArmy003[diffculty]
-	else
-		return 20
-	end
+	local hurtHp = ArmyManager.getHurtHp( hurtId )
+	return hurtHp
 end
 
 --下一轮的事件
 function StartScene:setNextRound()
 	local round = self:getRound()
 	local allRound = self:getAllRound()
-	if round < allRound then 
+	if round <= allRound then 
 		local armyNum = self:getArmyInRound(round)
 		if armyNum then 
 			self:setArmyNum(armyNum)
@@ -470,19 +469,19 @@ function StartScene:setNextRound()
 			self:createBoss()
 		end
 	else
-		self:createBoss()
+		self:getInNextScene()
 	end
 end
 
 --获得当前轮敌人出现的个数
 function StartScene:getArmyInRound(round)
 	if not round then round = 1 end
-	return ArmyInRound[round]
+	local armyNum = ArmyManager.getArmyNumInRound(round)
+	return armyNum
 end
 
 function StartScene:getAllRound()
-	local level = UserDataManager.getInstance():getMapLevel()
-	local round = LevelFuc.getAllRound(level)
+	local round = LevelManager.getAllRound()
 	return round
 end
 
@@ -504,7 +503,7 @@ function StartScene:createArmySomeTimeLater(  )
 		--获得创建敌人的时间
 		if self:isNeedCreateArmy() then 
 		--如果不需要创造敌人就取消计时器来创造敌人
-			local createArmyTime = self:getArmyCreateTime(self.index)
+			local createArmyTime = self:getArmyCreateTime()
 			if time >=  createArmyTime then
 				self:createArmy()
 				time = 0
@@ -516,7 +515,13 @@ function StartScene:createArmySomeTimeLater(  )
 			self:cleanOutWindowArmy()
 			--全部小怪死亡后移动背景
 			if self:isAllArmyDie()  then 
-				self:dispatchAllArmyDie()
+				if self:isAllRound() then 
+					--如果是最后一关
+					self:getInNextScene()
+				else
+					--派发全部敌人死亡，进入下一轮
+					self:dispatchAllArmyDie()
+				end
 				GameFuc.unSetUpdate(self.armyCreateHandler)
 				self.armyCreateHandler = nil
 			end
@@ -565,16 +570,9 @@ function StartScene:isAllArmyDie()
 	end
 end
 
-function StartScene:getArmyCreateTime( index )
+function StartScene:getArmyCreateTime(  )
 	--这里可以根据难度不同敌人创建的时间也不同
-	local diffculty = UserDataManager.getInstance():getDifficulty()
-	if diffculty == 1 then 
-		return World1ArmyCreateTimeEasy[index]
-	elseif diffculty == 2 then 
-		return World1ArmyCreateTimeNormal[index]
-	elseif diffculty == 3 then 
-		return World1ArmyCreateTimeHard[index]
-	end
+	return ArmyManager.getCreateArmyTime()
 end
 
 function StartScene:setScore(  )
@@ -582,74 +580,36 @@ function StartScene:setScore(  )
 	self.score:setScore(score)
 end
 
-function StartScene:defeatArmy( score )
+function StartScene:defeatArmy( score , recoverHp)
 	local deltaScore = score or 0
+	local deltaHp = recoverHp or 0
 	UserDataManager.getInstance():addPlayerScore(deltaScore)
-	self:setScore()
-end
-
-function StartScene:getIndexOfWorld( score )
-	local worldSeting = self:getWorldSetting()
-	local diffculty = UserDataManager.getInstance():getDifficulty()
-	local lengthOfSetting =  #worldSeting
-	for index = 1 , lengthOfSetting do
-		if score <= worldSeting[index] then 
-			if diffculty == 1 then 
-				return index
-			elseif diffculty == 2 then 
-				local lastIndex = index + 2
-				--如果未到最后就返回这个
-				if lastIndex <= lengthOfSetting then 
-					return lastIndex
-				else 
-					return lengthOfSetting
-				end
-			elseif diffculty == 3 then 
-				local lastIndex = index + 5
-				if lastIndex <= lengthOfSetting then 
-					return lastIndex
-				else 
-					return lengthOfSetting
-				end
-			end
-		end
-	end
-	return lengthOfSetting
-end
-
-function StartScene:getWorldSetting(  )
-	local diffculty = UserDataManager.getInstance():getDifficulty()
-	--对应简单难度
-	if diffculty == 1 then 
-
-	--对应普通难度
-	elseif diffculty == 2 then 
-
-	--对应困难难度
-	elseif diffculty == 3 then 
-
-	end 
-
-	return World1Setting
+	self.hero:addHp(deltaHp)
+	self:updateUI()
 end
 
 function StartScene:playBgSound(  )
 	AudioManager.playWorld1Sound()
 end
 
-function StartScene:EnterGameOverScene( flagWin  )
+--进入结算界面
+function StartScene:EnterResultScene( flagWin  )
 	--有没有超过记录
 	self:SaveHighestScore()
 	--进入到结算场景
 	local function getInNext()
-		local scene = SceneManager.createGameOverScene()
-		cc.Director:getInstance():replaceScene(scene)
+		AudioManager.stop()
+		SceneManager.getInNextLevelScene()
 	end
+	--true 进入下一关，false进入这一关
 	if flagWin == false then 
-		local scene = SceneManager.createGameOverScene()
+		UserDataManager.getInstance():reset()
+		local scene = SceneManager.createLevelScene()
 		local fadeIn = cc.TransitionFade:create(1,scene, cc.c3b(255, 0, 0) )
 		cc.Director:getInstance():replaceScene(fadeIn)
 	elseif flagWin == true then 
+		UserDataManager.getInstance():addMapLevel()
+		UserDataManager.getInstance():resetTime()
 		self:runAction(cc.Sequence:create( cc.DelayTime:create(1.5),cc.CallFunc:create(getInNext)  ))
 	end
 end

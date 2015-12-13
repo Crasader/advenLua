@@ -15,27 +15,34 @@ end
 
 function LevelShowScene:initWidget()
 	local level = UserDataManager.getInstance():getMapLevel()
-	local str = string.format("第%d关",level)
-	local title = cc.Label:createWithSystemFont(str, "Courier", 24)
-	title:setVisible(true)
-	title:setPosition(cc.p(display.cx, display.cy))
-	self:addChild(title,1,"levelName")
-	self.title = title
+	local life = UserDataManager.getInstance():getLife()
+	local widget = cc.CSLoader:createNode("Scene/LevelShowLayer.csb")
+	widget:setPosition(cc.p(display.cx/2, display.cy))
+
+	local lifeText = widget:getChildByName("life")
+	lifeText:setString(tostring(life))
+
+	local levelText = widget:getChildByName("level")
+	local str = string.format("%d - %d", 1, level)
+	levelText:setString(str)
+	self:addChild( widget )
+
+
+	self.widget = widget
 end
 
-function LevelShowScene:onEnter()
-	if self.title then 
-		local function getInStartScene()
-			self:getInStartScene()
-		end
-		local act = cc.Sequence:create( cc.FadeOut:create(2), cc.CallFunc:create(getInStartScene) )
-		self.title:runAction(act)
+function LevelShowScene:onEnter() 
+	local function getInStartScene()
+		self:getInStartScene()
+	end
+	local act = cc.Sequence:create( cc.DelayTime:create(3),cc.FadeOut:create(2), cc.CallFunc:create(getInStartScene) )
+	if self.widget then 
+		self.widget:runAction(act)
 	end
 end
 
 function LevelShowScene:getInStartScene()
-	local scene = SceneManager.createStartScene()
-	cc.Director:getInstance():replaceScene(scene)
+	SceneManager.getInGameScene()
 end
 
 return LevelShowScene

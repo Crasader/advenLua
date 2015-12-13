@@ -1,5 +1,5 @@
 local Hero = class("Hero", function()
-	return sp.SkeletonAnimation:create("Spine/maleHero.json", "Spine/maleHero.atlas", 0.8)
+	return sp.SkeletonAnimation:create("Spine/skeleton.json", "Spine/skeleton.atlas", 0.8)
 	end)
 
 function Hero:ctor()
@@ -8,7 +8,7 @@ function Hero:ctor()
 	self:setMix("attack", "idle", 0.2)
 
 	self:setAnimation(0 ,"idle", true)
-	self:changeState("IDLE")
+	self:changeState(const.HERO_IDLE)
 
 	self:initData()
 	local function onNodeEvent(event)
@@ -35,24 +35,24 @@ function Hero:initData(  )
 
 	self.physicsBody:setPositionOffset(cc.p( 50,0 ))
 
-	self.hp_ = 100
+	self.hp_ = UserDataManager.getInstance():getHp()
 
 end
 
 function Hero:setHp( value )
-	self.hp_ = value
+	UserDataManager.getInstance():setHp(value)
 end
 
 function Hero:getHp()
-	return self.hp_
+	return UserDataManager.getInstance():getHp()
 end
 
 function Hero:MinitesHp( value )
-	self.hp_ = self.hp_ - value
+	UserDataManager.getInstance():subHp(value)
 end
 
 function Hero:addHp( value )
-	self.hp_ = self.hp_ + value
+	UserDataManager.getInstance():addHp(value)
 end
 
 function Hero:addEvent()
@@ -67,19 +67,35 @@ function Hero:addEvent()
 	self:registerSpineEventHandler(handler(self, self.setAnimationEvent), sp.EventType.ANIMATION_EVENT)
 
 	--注册添加触摸监听器
-	local listener = cc.EventListenerTouchAllAtOnce:create()
-	listener:registerScriptHandler(handler(self, self.dealTouchBegan), cc.Handler.EVENT_TOUCHES_BEGAN)
-	listener:registerScriptHandler(handler(self, self.dealTouchMoved), cc.Handler.EVENT_TOUCHES_MOVED)
-	listener:registerScriptHandler(handler(self, self.dealTouchEnded), cc.Handler.EVENT_TOUCHES_ENDED)
+	local listener = cc.EventListenerTouchOneByOne:create()
+	self.touchListener = listener
+	listener:setSwallowTouches(true)
+	listener:registerScriptHandler(handler(self, self.dealTouchBegan), cc.Handler.EVENT_TOUCH_BEGAN)
 	eventDispatcher_:addEventListenerWithSceneGraphPriority(listener, self)
 
 	--注册添加角色掉到木板
 	local onFloorEvent = cc.EventListenerCustom:create( EventConst.HERO_ON_WALL, handler(self, self.onFloor) )
 	eventDispatcher_:addEventListenerWithSceneGraphPriority(onFloorEvent, self)
+
+	--屏幕移动时候角色移动
+	local eventListener = cc.EventListenerCustom:create(EventConst.SCROLL_VIEW, handler(self, self.onMove))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(eventListener, self)
+
+	--下一轮时候角色静止
+	local nextRoundEvent = cc.EventListenerCustom:create( EventConst.NEXT_ROUND, handler(self, self.onStatic) )
+
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(nextRoundEvent, self)
 end
 
 function Hero:onFloor()
-	self:changeState( "Idle" )
+	self:Idle()
+end
+
+function Hero:onMove()
+	self:Walk()
+end
+
+function Hero:onStatic()
 	self:Idle()
 end
 
@@ -92,30 +108,28 @@ function Hero:setAnimationEvent(event)
                               event.eventData.stringValue)) 
 
 		 if event.eventData.name == "attack_end" then 
-		 	print("attack End")
-		 	--空中攻击不改变状态
-		 	if self:getState() == "AIRATTACK" then
-		 		
+		 	--空中不改变状态
+		 	if const.HERO_AIRATTACK == self:getState()   or const.HERO_JUMP == self:getPreState() or self:getState() == const.HERO_DIE then
+		 		return 
 		 	else
 			 	self:Idle()
-			 end
+			end
 		end
 end
 
 function Hero:dealTouchBegan(touches, event)
-	print("dealTouchBegan~~~~~")
-	local x = touches[1]:getLocation().x
-	local y = touches[1]:getLocation().y
-	print(x,y)
+	GameFuc.setSpeedScale( 1 )
+	local x = touches:getLocation().x
+	local y = touches:getLocation().y
 	--左侧就是跳跃，右侧是攻击
 	if x > display.width/2 and y < display.cy then 		
 		self:Attack()
-	elseif x < display.width/2 and y > display.height/2 then 
-		GameFuc.setSpeedScale( 2 )
+	-- elseif x < display.width/2 and y > display.height/2 then 
+	-- 	GameFuc.setSpeedScale( 2 )
 	else
 		self:Jump()
 	end
-	return true
+	return false
 end
 
 function Hero:dealTouchMoved(touches, event)
@@ -123,35 +137,50 @@ function Hero:dealTouchMoved(touches, event)
 
 end
 
-function Hero:dealTouchEnded(touch, event)
-	GameFuc.setSpeedScale( 1 )
+function Hero:dealTouchEnded(touches, event)
+	
 end
 
 function Hero:Attack()
-	if self:getState() ~= "ATTACK" then
-		self:playAttackSound()
+	--走的时候不响应攻击
+	if self:getState() ~= const.HERO_ATTACK and self:getState() ~= const.HERO_WALK and 
+		self:getState() ~= const.HERO_DIE then
 		self:setAnimation(0, "attack", false)
-		if self:getState() == "JUMP" then 
-			self:changeState( "AIRATTACK" )
-		else
-			self:changeState("ATTACK")
-		end
+		self:changeState(const.HERO_ATTACK)
+		self:playAttackSound()
 	end
 	
 end
 
 function Hero:Jump()
-	if self:getState() ~= "JUMP" and self:getState() ~= "AIRATTACK" then
+	--走路和攻击时候和死亡不可跳跃
+	if self:getState() ~= const.HERO_JUMP and self:getState() ~= const.HERO_ATTACK and 
+		self:getState() ~= const.HERO_WALK and self:getState() ~= const.HERO_DIE then
 		-- self:setAnimation(0, "attack", false)
 		self:runAction(cc.JumpBy:create(1, cc.p(0,500), display.cy/2, 1))
-		self:changeState("JUMP")
+		self:setAnimation(0, "jump", false)
+		self:changeState(const.HERO_JUMP)
 	end
 end
 
 function Hero:Idle()
-	if self:getState() ~= "IDLE" then
+	if self:getState() ~= const.HERO_IDLE and self:getState() ~= const.HERO_DIE then
 		self:setAnimation(0, "idle", true)
-		self:changeState("IDLE")
+		self:changeState(const.HERO_IDLE)
+	end
+end
+
+function Hero:Walk()
+	if self:getState() ~= const.HERO_WALK and self:getState() ~= const.HERO_DIE then 
+		self:setAnimation(0, "walk", true)
+		self:changeState(const.HERO_WALK)
+	end
+end
+
+function Hero:Die()
+	if self:getState() ~= const.HERO_DIE then 
+		self:setAnimation(0, "die", false)
+		self:changeState(const.HERO_DIE)
 	end
 end
 

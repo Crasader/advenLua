@@ -10,10 +10,17 @@ function createStartScene()
 	return scene
 end
 
---结算界面
+--游戏失败界面
 function createGameOverScene()
 	local scene = require("app.GameScene.GameOverScene").new()
 	return scene
+end
+
+--游戏成功，下一个关卡前界面
+function createReadtNextLevelScene()
+	local scene = SceneManager.createLevelScene()
+	return scene
+	-- SceneManager.getInLevelScene()
 end
 
 function createMainMenuScene()
@@ -31,4 +38,32 @@ end
 function createLevelScene()
 	local scene = require("app.GameScene.LevelShowScene").new()
 	return scene
+end
+
+--进入关卡场景
+function getInLevelScene()
+	local scene = SceneManager.createLevelScene()
+	cc.Director:getInstance():replaceScene(scene)
+end
+
+--进入游戏场景
+function getInGameScene()
+	local scene = SceneManager.createStartScene()
+	cc.Director:getInstance():replaceScene(scene)
+end
+
+--进入下一关场景
+function getInNextLevelScene()
+	AudioManager.stop()
+	local scene = SceneManager.createReadtNextLevelScene()
+	local wrapScene = cc.TransitionFade:create(1, scene, cc.c3b(0, 0, 0))
+	cc.Director:getInstance():replaceScene(wrapScene)
+end
+
+--进入游戏结束结算界面
+function getInOverScene()
+	AudioManager.stop()
+	local scene = SceneManager.createGameOverScene()
+	local wrapScene = cc.TransitionFade:create(1, scene, cc.c3b(255, 0, 0))
+	cc.Director:getInstance():replaceScene(wrapScene)
 end

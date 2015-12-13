@@ -7,41 +7,70 @@ function LoadingAssetScene:ctor(  )
 end
 
 function LoadingAssetScene:init(  )
-	local title = cc.Label:createWithSystemFont("Loading...", "Courier", 24)
-
-	title:setPosition(cc.p(display.cx, display.cy))
-	self:addChild(title)
-
-	self.title = title
-
-
+	
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
 	    end
   	end
+  	self.pngFileNum = 0.0
+  	self.allPngBum = #pngFile
 
   self:registerScriptHandler(onNodeEvent)
 	
 end
 
 function LoadingAssetScene:onEnter(  )
+	local str = string.format("%02d", self.pngFileNum/self.allPngBum)
+	local title = cc.Label:createWithSystemFont(str, "Courier", 42)
+
+	title:setPosition(cc.p(display.width - 200, 100))
+	self:addChild(title)
+
+	self.title = title
+	
 	self:readyIntoGame()
 end
 
+function LoadingAssetScene:afterLoading()
+	self.pngFileNum = self.pngFileNum + 1.0
+	self:updateTitle()
+	if self.pngFileNum >= self.allPngBum then 
+		self:loadingAsset()
+	else
+		display.loadImage(pngFile[self.pngFileNum],function (  )
+			self:afterLoading()
+		end)
+	end
+end
+
+function LoadingAssetScene:updateTitle()
+	local str = string.format("%02d", self.pngFileNum /self.allPngBum * 100 )
+	str = str.."%"
+	if self.title then 
+		self.title:setString(str)
+	end
+end
+
+function LoadingAssetScene:loadTex()
+	--加载单张的小图
+	if pngFile then 
+		display.loadImage(pngFile[1],function (  )
+			self:afterLoading()
+		end)
+	end
+
+	return true
+
+end
+
 function LoadingAssetScene:loadingAsset(  )
+
 	--加载plist
 	if plistFile then 
 		for c,v in pairs (plistFile) do
 			print(v)
 			cc.SpriteFrameCache:getInstance():addSpriteFrames(v)
-		end
-	end
-
-	--加载单张的小图
-	if pngFile then 
-		for c, v in pairs (pngFile) do
-			cc.Director:getInstance():getTextureCache():addImage(v)
 		end
 	end
 
@@ -70,25 +99,20 @@ function LoadingAssetScene:loadingAsset(  )
 	end
 
 	UserDataManager.getInstance()
-	return true
+
+	local ifno = cc.Director:getInstance():getTextureCache():getCachedTextureInfo()
+    print("ifno", ifno)
+	self:StartGame()
 end
 
 function LoadingAssetScene:readyIntoGame(  )
-	if self:loadingAsset() then 
-		self:StartGame()
-	else
-		self:readyIntoGame()
-	end
+	self:loadTex()
 end
 
 
 function LoadingAssetScene:StartGame(  )
-	local function goToPlay(  )
-		local scene = SceneManager.createMainMenuScene()
-		cc.Director:getInstance():replaceScene(scene)
-	end
-	self.title:setString("冒险即将开始...")
-	self.title:runAction(cc.Sequence:create( cc.FadeOut:create(1.5), cc.CallFunc:create( goToPlay )) )
+	local scene = SceneManager.createMainMenuScene()
+	cc.Director:getInstance():replaceScene(scene)
 end
 
 

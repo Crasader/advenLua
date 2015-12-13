@@ -1,7 +1,7 @@
 module("EffectFactory", package.seeall)
 
-function createBossFire(  )
-	local fire = require("app/Effect/Boss01Fire").new()
+function createBossFire( id )
+	local fire = require("app/Effect/Boss01Fire").new( BulletData[id] )
 
 	return fire
 end

@@ -5,14 +5,22 @@
 require "app.Data.LoadingData"
 --载入常量
 require "app.const"
+require "app.GameConst"
+require "app.Data.GameSetting"
 --载入事件用常量
 require "app.EventConst"
 --加载敌人出现的速度
 require "app.Data.ArmySpeed"
+require "app.Data.ArmyData"
 --加载关卡设置
 require "app.Data.World1"
+require "app.Data.World2"
+require "app.Data.World3"
 --加载敌人配置
 require "app.Data.NormalArmyData"
+require "app.Data.NormalBossData"
+--加载地图配置
+require "app.Data.MapData"
 
 --载入常用函数
 require "app.GameFuc"
@@ -37,9 +45,6 @@ require "app.models.SceneManager"
 --载入物理世界的管理者
 require "app.models.PhysicsManager"
 
---载入保存数据的管理者
-require "app.models.DataManager"
-
 --载入创建角色的管理者
 require "app.models.MainRoleManager"
 
@@ -54,4 +59,6 @@ require "app.models.ObjectManager"
 require "app.models.UserDataManager"
 --敌人数据管理者
 require "app.models.ArmyManager"
+--关卡管理者
+require "app.models.LevelManager"
 

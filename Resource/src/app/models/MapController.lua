@@ -44,13 +44,13 @@ function MapController:setNextMap(  )
 		local size = self.map2:getContentSize()
 		self.map1:setPosition(cc.p( posx + display.width, posy ))
 		self.nextMap = 2
-		self.map2:playBloom()
+		-- self.map2:playBloom()
 	elseif tag ==2 then 
 		local posx, posy = self.map1:getPosition()
 		local size = self.map1:getContentSize()
 		self.map2:setPosition(cc.p( posx + display.width , posy ))
 		self.nextMap = 1
-		self.map1:playBloom()
+		-- self.map1:playBloom()
 	end
 end
 

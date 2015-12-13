@@ -36,6 +36,15 @@ function isBulletContactWithArmy( spriteA, spriteB )
 	return false
 end
 
+--子弹与子弹的碰撞
+function isBulletContactWithBullet(spriteA, spirteB)
+	if spriteA and (spriteA:getTag() == const.BULLET) and (spriteB:getTag() == const.BULLET) 
+		or spriteB and (spriteB:getTag() == const.BULLET) and (spriteA:getTag() == const.BULLET) then
+		return true
+	end
+	return false
+end
+
 --主角是否与墙壁碰撞
 function isHeroContactWithWall( spriteA,  spriteB )
 	if spriteA and (spriteA:getTag() == const.HERO) and (spriteB:getTag() == const.WALL) 
@@ -109,4 +118,14 @@ end
 --取消update函数
 function unSetUpdate( id)
 	cc.Director:getInstance():getScheduler():unscheduleScriptEntry(id)
+end
+
+--获得应该获得的分数
+function getNeedScore( score )
+	return score
+end
+
+--获得应该恢复的Hp
+function getRecoverHp( value )
+	return value
 end

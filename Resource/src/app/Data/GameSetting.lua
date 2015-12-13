@@ -1,0 +1,1 @@
+UP_LEFT_SCORE = 5000

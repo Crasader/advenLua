@@ -23,7 +23,17 @@ function NormalArmy:initData()
 	self:setId(id)
 
 	local score = ArmyScore[id]
-	self.setScore(score)
+	self:setScore(score)
+
+	local recoverHp = 5
+	local num = math.random(1, 10)
+	if num >= 6 then 
+		recoverHp = 50
+		--特殊怪物，闪光特效
+		self:Blink()
+	end
+	self:setRecoverHp( recoverHp )
+
 	self:setTag(const.NORMAL_ARMY)
 end
 
@@ -41,6 +51,15 @@ end
 
 function NormalArmy:getScore()
 	return self.needScore
+end
+
+--打败敌人获得增加Hp的数值
+function NormalArmy:setRecoverHp( value )
+	self.recoverHp = value
+end
+
+function NormalArmy:getRecoverHp()
+	return self.recoverHp
 end
 --视图有关
 function NormalArmy:initWidget()
@@ -84,6 +103,11 @@ function NormalArmy:playDefeatEffect(  )
 
 	local act = cc.Sequence:create(cc.DelayTime:create(0.4), cc.CallFunc:create(dieEffect) )
 	self:runAction(act)
+end
+
+function NormalArmy:Blink()
+	local act = cc.Sequence:create( BloomUp:create(2.0, 0.2, 0.8), BloomUp:create(2.0, 0.8, 0.2) )
+	self.body:runAction( cc.RepeatForever:create(act) )
 end
 
 function NormalArmy:playHitSound(  )

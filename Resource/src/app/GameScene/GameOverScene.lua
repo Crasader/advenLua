@@ -6,7 +6,6 @@ function GameOverScene:ctor(  )
 	local layer = cc.LayerColor:create( cc.c4b(255, 255, 255, 255))
 	self:addChild(layer)
 	self.Layer = layer 
-	self:initData()
 	self:addEvent()
 	local function onNodeEvent(event)
 	    if event == "enter" then
@@ -19,7 +18,7 @@ function GameOverScene:ctor(  )
 end
 
 function GameOverScene:initData(  )
-	
+	UserDataManager.getInstance():initDefault()
 end
 
 function GameOverScene:addEvent()
@@ -45,6 +44,7 @@ function GameOverScene:onEnter(  )
 	panel:runAction(cc.MoveBy:create(0.3, cc.p(0, -display.cy)))
 	self.Layer:addChild(panel)
 	self.scorePanel = panel 
+	self:initData()
 end
 
 function GameOverScene:showRank(  )

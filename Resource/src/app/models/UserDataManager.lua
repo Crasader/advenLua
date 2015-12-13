@@ -20,6 +20,72 @@ end
 function init( self )
 	self:setMapLevel(1)
 	self:setMapRound(1)
+	self:setDefaultHp(GameConst.DEAULT_HP)
+	self:setDefaultLife(GameConst.DEFAULT_LIFE)
+	self:setPlayerScore(0)
+	self:setDefaultTime()
+end
+
+function initDefault(self)
+	self:setDefaultHp(GameConst.DEAULT_HP)
+	self:setDefaultLife(GameConst.DEFAULT_LIFE)
+	self:setMapRound(1)
+	self:setPlayerScore(0)
+	self:setDefaultTime()
+end
+
+--消耗一条生命之后重置生命值
+function reset(self)
+	self:setDefaultHp(100)
+	self:setMapRound(1)
+	self:setDefaultTime()
+end
+
+function resetTime(self)
+	self:setDefaultTime()
+end
+
+--设置默认的生命值
+function setDefaultLife(self, value)
+	self:setLife( value )
+end
+
+function setLife(self, value)
+	self.life_ = value
+end
+
+function addLife(self)
+	self:setLife(self:getLife() + 1)
+end
+
+function subLife(self)
+	self:setLife(self:getLife() - 1)
+end
+
+function getLife(self, value)
+	return self.life_
+end
+
+--设置默认血量
+function setDefaultHp( self,value )
+	self.hp_ = value
+end
+
+function setHp(self, value)
+	self.hp_ = value
+end
+
+function getHp(self)
+	return self.hp_
+end
+
+function addHp(self, value)
+	if self.hp_ >= GameConst.DEAULT_HP then return end
+	self.hp_ = self.hp_ + value
+end
+
+function subHp( self, value )
+	self.hp_ = self.hp_ - value
 end
 
 --设置关卡
@@ -80,14 +146,16 @@ end
 --设置玩家性别
 function setPlayerSex(self, sex)
 	self.playerSex_ = sex
-	cc.UserDefault:getInstance():setIntegerForKey("Sex", key)
+	cc.UserDefault:getInstance():setIntegerForKey("Sex", sex)
 end
 
 function getPlayerSex(self)
 	if not self.playerSex_ then
 		self.playerSex_ = cc.UserDefault:getInstance():getIntegerForKey("Sex", 1)
 	end 
-	return self.playerSex_
+	-- return self.playerSex_
+	--女角色没做好，默认范围男的
+	return 1
 end
 
 --获得玩家最高分数
@@ -116,6 +184,27 @@ end
 --获取玩家分数
 function getPlayerScore(self)
 	return self.playerScore_
+end
+
+--设置默认时间
+function setDefaultTime(self)
+	self:setTime(GameConst.DEFAULT_TIME) 
+end
+
+function setTime(self, value)
+	self.time_ = value
+end
+
+function subTime(self)
+	self:setTime(self:getTime() - 1)
+end
+
+function addTime(self)
+	self:setTime(self:getTime() + 1)
+end
+
+function getTime(self)
+	return self.time_
 end
 
 

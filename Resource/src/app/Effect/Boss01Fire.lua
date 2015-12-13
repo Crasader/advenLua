@@ -1,14 +1,14 @@
-local  Boss01Fire = class("Boss01Fire", function (  )
-	return cc.CSLoader:createNode( "Effect/BossAttackEffect.csb" )
+local  Boss01Fire = class("Boss01Fire", function ( fileName )
+	return cc.CSLoader:createNode( fileName )
 end)
 
-function Boss01Fire:ctor(  )
-	self:initData()
+function Boss01Fire:ctor( fileName )
+	self:initData( fileName )
 	self:setPhysics()
 end
 
-function Boss01Fire:initData( )
-	local act = cc.CSLoader:createTimeline( "Effect/BossAttackEffect.csb" )
+function Boss01Fire:initData( fileName )
+	local act = cc.CSLoader:createTimeline( fileName )
 	self.act = act
 	self.body = self:getChildByName("Fire")
 	self:runAction(act)
@@ -42,7 +42,7 @@ end
 
 function Boss01Fire:setNormalOffset()
 	local phyBody = self:getPhysicsBody()
-	phyBody:setPositionOffset(cc.p( -280, 0 ))
+	-- phyBody:setPositionOffset(cc.p( -280, 0 ))
 end
 function Boss01Fire:setSpeed( speed )
 	self:getPhysicsBody():setVelocity(cc.p(speed.x, speed.y))
@@ -63,7 +63,7 @@ end
 
 function Boss01Fire:setReverseOffset()
 	local phyBody = self:getPhysicsBody()
-	phyBody:setPositionOffset(cc.p( -280 - 70, 0 ))
+	-- phyBody:setPositionOffset(cc.p( -280 - 70, 0 ))
 end
 
 function Boss01Fire:Fire(  )
