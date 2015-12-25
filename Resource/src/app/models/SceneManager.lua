@@ -24,8 +24,20 @@ function createReadtNextLevelScene()
 end
 
 function createMainMenuScene()
+	local scene = require("app.GameScene.MainMenuScene").new()
+	return scene
+end
+
+--进入设置场景
+function createSettingScene()
 	local scene = require("app.GameScene.MenuScene").new()
 	return scene
+end
+
+--进入游戏场景
+function createMenuScene()
+	local scene = require("app.GameScene.MenuScene").new()
+	return scene 
 end
 
 --载入资源的场景
@@ -38,6 +50,18 @@ end
 function createLevelScene()
 	local scene = require("app.GameScene.LevelShowScene").new()
 	return scene
+end
+
+--进入游戏场景
+function getInMenuScene()
+	local scene = SceneManager.createMenuScene()
+	cc.Director:getInstance():replaceScene(scene)
+end
+
+--进入设置场景
+function getInSettingScene()
+	local scene = SceneManager.createSettingScene()
+	cc.Director:getInstance():replaceScene(scene)
 end
 
 --进入关卡场景

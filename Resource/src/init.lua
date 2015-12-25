@@ -16,6 +16,7 @@ require "app.Data.ArmyData"
 require "app.Data.World1"
 require "app.Data.World2"
 require "app.Data.World3"
+require "app.Data.World4"
 --加载敌人配置
 require "app.Data.NormalArmyData"
 require "app.Data.NormalBossData"
@@ -41,6 +42,7 @@ require "app.models.UIManager"
 
 --载入创建场景所用的管理者
 require "app.models.SceneManager"
+require "app.models.LayerManager"
 
 --载入物理世界的管理者
 require "app.models.PhysicsManager"
@@ -57,6 +59,8 @@ require "app.models.AudioManager"
 require "app.models.ObjectManager"
 --载入玩家数据管理者
 require "app.models.UserDataManager"
+--载入游戏数据管理者
+require "app.models.GameDataManager"
 --敌人数据管理者
 require "app.models.ArmyManager"
 --关卡管理者

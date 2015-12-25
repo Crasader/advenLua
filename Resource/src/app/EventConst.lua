@@ -4,11 +4,23 @@ module("EventConst", package.seeall)
 BOSS01_DIE		=  "boss01Die"
 BOSS_SHOOT				=  "bossShoot"
 
+--主角打击到普通怪物
+HERO_HIT_NORMAL_ARMY  = "heroHitNormalArmy"
 
 --主角死亡事件
 HERO_DIE			= "heroDie"
 --主角与墙壁碰撞
 HERO_ON_WALL		="heroOnWall"
+--主角右移事件
+HERO_MOVE_RIGHT		= "heroMoveRight"
+--主角左移事件
+HERO_MOVE_LEFT		= "heroMoveLeft"
+--主角静止事件
+HERO_IDLE			= "heroIdle"
+--主角攻击事件
+HERO_ATTACK			="heroAttack"
+--主角跳跃事件
+HERO_JUMP			="heroJump"
 
 --暂停时间
 GAME_CUT  				= "gameCut"
@@ -22,7 +34,12 @@ IN_RANK					="inRank"
 CHANGE_MAP				="changeMap"
 --滚动摄像机
 SCROLL_VIEW				="scrollView"
+--自动滚动摄像机
+SCROLL_RIGHT 			="scrollRight"
+SCROLL_LEFT				="scrollLeft"
 --一轮全部敌人死亡的事件
 ALL_DIE					="allDie"
 --下一轮事件
 NEXT_ROUND				="nextRound"
+
+

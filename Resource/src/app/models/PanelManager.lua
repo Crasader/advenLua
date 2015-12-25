@@ -6,6 +6,12 @@ function createNamePanel()
 	return panel
 end
 
+--主菜单
+function createMainMenuPanel()
+	local panel = require("app.Panel.MainMenuPanel").new()
+	return panel
+end
+
 --选角
 function createSelectRolePanel()
 	local panel = require("app.Panel.SelectRolePanel").new()

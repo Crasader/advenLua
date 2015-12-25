@@ -24,11 +24,8 @@ function TimePanel:addEvent()
 end
 
 function TimePanel:onEnter()
-	print("onEnter~~~~~~~~~")
 	local function update( dt )
-		print("dt", dt)
 		local time = UserDataManager.getInstance():getTime()
-		print("time", time)
 		if time > 0 then 
 			UserDataManager.getInstance():subTime()
 			self:updateTime()

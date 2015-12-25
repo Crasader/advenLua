@@ -45,7 +45,7 @@ function GameOverPanel:onEnter(  )
 	
 	local function goFight( sender, eventType )
 		if eventType ~= ccui.TouchEventType.ended then return end
-		local scene = SceneManager.createMainMenuScene()
+		local scene = SceneManager.createMenuScene()
 		cc.Director:getInstance():replaceScene(scene)
 	end
 

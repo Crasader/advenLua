@@ -80,8 +80,10 @@ function getHp(self)
 end
 
 function addHp(self, value)
-	if self.hp_ >= GameConst.DEAULT_HP then return end
 	self.hp_ = self.hp_ + value
+	if self.hp_ >= GameConst.DEAULT_HP then
+		self.hp_ = GameConst.DEAULT_HP
+	end
 end
 
 function subHp( self, value )
@@ -205,6 +207,19 @@ end
 
 function getTime(self)
 	return self.time_
+end
+
+--摄像机控制
+function isMapCameraStop(self)
+	return self.isMapCameraStop_ 
+end
+
+function mapCameraStop(self)
+	self.isMapCameraStop_ = true
+end
+
+function mapCameraMove(self)
+	self.isMapCameraStop_ = false
 end
 
 

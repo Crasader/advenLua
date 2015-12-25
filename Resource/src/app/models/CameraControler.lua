@@ -12,9 +12,38 @@ function CameraControler:ctor( camera , heroPosition)
 	local function onNodeEvent(event)
 	    if event == "enter" then
 	        self:onEnter()
+       elseif event == "exit" then 
+	       	self:onExit()
 	    end
   	end
+
+  	self:OnUpdate()
   	self:registerScriptHandler(onNodeEvent)
+end
+
+function CameraControler:OnUpdate()
+	if self.handler then 
+		GameFuc.unSetUpdate(self.handler)
+		self.handler = nil
+	end
+
+	--使用定时器
+	local function changePos(dt)
+		
+		
+	end
+	self.handler = GameFuc.setUpdate(changePos, 1/60,false)
+end
+
+function CameraControler:OffUpdate()
+	if self.handler then 
+		GameFuc.unSetUpdate(self.handler)
+		self.handler = nil
+	end
+end
+
+function CameraControler:onExit()
+	self:OffUpdate()
 end
 
 function CameraControler:addEvent()
@@ -23,6 +52,39 @@ function CameraControler:addEvent()
 
 	local eventListenerArmyDie = cc.EventListenerCustom:create(EventConst.ALL_DIE, handler(self, self.MoveBgView))
 	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(eventListenerArmyDie, self)
+
+	--角色移动地图
+	local MoveRightListener = cc.EventListenerCustom:create(EventConst.SCROLL_RIGHT, handler(self, self.MoveBgRight))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(MoveRightListener, self)
+
+	local MoveLeftListener = cc.EventListenerCustom:create(EventConst.SCROLL_LEFT, handler(self, self.MoveBgLeft))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(MoveLeftListener, self)
+
+	local hitNormalArmyListener = cc.EventListenerCustom:create(EventConst.HERO_HIT_NORMAL_ARMY, handler(self, self.shake))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(hitNormalArmyListener, self)
+end
+
+function CameraControler:MoveBgRight()
+	if self.mapCamera then 
+		local posx, posy = self.mapCamera:getPosition()
+		local mapSize = GameDataManager.getInstance():getMapSize()
+		if mapSize.width - display.cx >= posx then 
+			self.mapCamera:setPositionX(posx + 1)
+			UserDataManager.getInstance():mapCameraMove()
+		end
+	end
+end
+
+function CameraControler:MoveBgLeft()
+	if self.mapCamera then 
+		local posx, posy = self.mapCamera:getPosition()
+		if posx >= display.cx then 
+			self.mapCamera:setPositionX(posx - 1)
+			UserDataManager.getInstance():mapCameraMove()
+		else
+			UserDataManager.getInstance():mapCameraStop()
+		end
+	end
 end
 
 --移动摄像机
@@ -99,11 +161,15 @@ function CameraControler:playMoveAction()
 	end
 
 	local mapAct2 = cc.MoveBy:create(5, cc.p(display.width, 0))
-	local act = cc.Sequence:create( mapAct2, cc.CallFunc:create(dispatchMapEvent), cc.CallFunc:create(dispatchContinuePKEvent))
-	if self:isCanMoveView() then
-		self:setIsCanMove( false)
-		self.mapCamera:runAction(act)
-	end
+	-- local act = cc.Sequence:create( mapAct2, cc.CallFunc:create(dispatchMapEvent), cc.CallFunc:create(dispatchContinuePKEvent))
+	--不再滚动界面，而是等一下再创建新的敌人
+	local act = cc.Sequence:create( cc.DelayTime:create(5), cc.CallFunc:create(dispatchContinuePKEvent) )
+	self.mapCamera:runAction(act)
+end
+
+function CameraControler:shake()
+	local act = cc.Sequence:create( cc.MoveBy:create(0.1, cc.vec3(0, 2, 0)),cc.MoveBy:create(0.1, cc.vec3(0, -2, 0)) )
+	self.mapCamera:runAction(act)
 end
 
 function CameraControler:setIsCanMove( isMove )

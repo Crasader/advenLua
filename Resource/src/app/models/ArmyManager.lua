@@ -10,6 +10,8 @@ function getAllArmy()
 		return INDEX_OF_ARMY_WORLD_TWO
 	elseif level == 3 then 
 		return INDEX_OF_ARMY_WORLD_THREE
+	elseif level == 4 then 
+		return INDEX_OF_ARMY_WORLD_FOUR
 	end
 
 	return INDEX_OF_ARMY_WORLD_ONE
@@ -24,6 +26,8 @@ function getRoundArmyIndex()
 		return WorldTwoArmyInRound
 	elseif level == 3 then 
 		return WorldThreeArmyInRound
+	elseif levell == 4 then 
+		return WorldFourArmyInRound
 	end
 	return WorldOneArmyInRound
 end
@@ -37,6 +41,8 @@ function getRoundBossIndex()
 		return WorldTwoBossInRound
 	elseif level == 3 then 
 		return WorldThreeBossInRound
+	elseif level == 4 then 
+		return WorldFourBossInRound
 	end
 	return WorldOneArmyInRound
 end
@@ -61,23 +67,9 @@ end
 
 --获取敌人的速度
 function getSpeed( id )
-	local level = UserDataManager.getInstance():getMapLevel()
-	local round = UserDataManager.getInstance():getMapRound()
-	local speedTbl = ArmyManager.getSpeedTbl( id )
-	return speedTbl[(level-1)*10+round]
-end
-
---获取敌人速度列表
-function getSpeedTbl(id)
-	if id == 1 then 
-		return Army001Speed
-	elseif id == 2 then 
-		return Army002Speed
-	elseif id == 3 then 
-		return Army003Speed
-	else
-		return Army003Speed
-	end
+	print("id", id)
+	if not id then return ArmySpeed[1] end
+	return ArmySpeed[id]	
 end
 
 --获取对应怪物造成的伤害

@@ -41,14 +41,11 @@ World1ArmyCreateTimeHard = {
 }
 
 WorldOneArmyInRound = {
-	[1] = 5,
-	[2] = 10,
-	[3] = 7,
-	[4] = 10,
-	[5] = 20,
-	[6] = 25,
-	[7] = 30,
-	[8] = 40
+	[1] = 10,
+	[2] = 20,
+	[3] = 20,
+	[4] = 25,
+	[5] = 25,
 }
 
 WorldOneBossInRound = {
@@ -58,10 +55,10 @@ WorldOneBossInRound = {
 INDEX_OF_ARMY_WORLD_ONE = {
 	[1] = 1,
 	[2] = 2,
-	[3] = 3
+	[3] = 3,
 }
 
 
 
-WORLD_ONE_ROUND_NUM = 8
-WORLD_ONE_GAMETIME = 300
+WORLD_ONE_ROUND_NUM = 5
+WORLD_ONE_GAMETIME = 200

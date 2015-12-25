@@ -2,8 +2,11 @@
 module("MainRoleManager", package.seeall)
 
 --创建男性角色
-function createMaleHero()
-	local role = require("app.views.Hero").new()
+function createMaleHero( needPhysics )
+	local role = require("app.views.Hero").new( needPhysics )
+	if needPhysics == true then 
+		role:setPhysics()
+	end
 	return role
 end
 

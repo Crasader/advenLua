@@ -153,22 +153,21 @@ function StartScene:addUI(  )
 	self.Layer = layer
 	--add Back
 	local backGround = LevelManager.getLevel()
-	local backGround2 = LevelManager.getLevel()
+
 	self.Layer:addChild(backGround)
-	self.Layer:addChild(backGround2)
 	--控制背景层
-	local mapController = ObjectManager.createMapControl(backGround, backGround2)
+	local mapController = ObjectManager.createMapControl(backGround)
 	self.Layer:addChild(mapController)
 	
 	--添加暂停键
-	local btnZT = UIManager.createCutBtn()
-	btnZT:setPosition(cc.p( 50, display.height - 35 ))
-	self.Layer:addChild(btnZT,20)
+	-- local btnZT = UIManager.createCutBtn()
+	-- btnZT:setPosition(cc.p( 50, display.height - 35 ))
+	-- self.Layer:addChild(btnZT,20)
 
 	--add Hp
 	local hpPanel = UIManager.createHpBar()
 	--初始化设置其hp
-	hpPanel:setPosition(cc.p(200, display.height - 20))
+	hpPanel:setPosition(cc.p(100, display.height - 20))
 	self.hpWidget = hpPanel
 	self.Layer:addChild(hpPanel,20)
 
@@ -194,12 +193,22 @@ function StartScene:addUI(  )
 	self.Layer:addChild(effect)
 	self.effect = effect
 
+	--添加控制器
+	local GamePad = UIManager.createGamePad()
+	GamePad:setPosition(cc.p( 0, 0 ))
+	self.Layer:addChild(GamePad)
+
+	--添加技能栏
+	local attackPanel = UIManager.createSkillPanel()
+	attackPanel:setPosition(cc.p( display.width, 0 ))
+	self.Layer:addChild(attackPanel)
+
 end
 
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
 	physicsWorld:setGravity(cc.p(0,-500))
-	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
@@ -210,7 +219,8 @@ function StartScene:addMainCharacter(  )
 
 	local sex = UserDataManager.getInstance():getPlayerSex()
 	self.hero = self:createHeroById(sex )
-	self.hero:setPosition(cc.p(display.cx/2, 275 ))
+	--
+	self.hero:setPosition(cc.p(display.cx/2 - 200, 275 ))
 	--最后才设置位置
 	self.Layer:addChild(self.hero,10)
   	self:createArmy()
@@ -228,26 +238,26 @@ end
 
 function StartScene:createHeroById( id )
 	if id == 1 then
-		return MainRoleManager.createMaleHero()
+		local hero = MainRoleManager.createMaleHero( true )
+		hero:OnUpdate()
+		return hero
 	elseif id == 2 then
 		return MainRoleManager.createFemaleHero()
 	end
 end
 
 function StartScene:createArmy(  )
-	
 	--对应当前轮返回对应敌人的id
 	local armyId = self:getArmyId()
 	local army = ArmyManager.getArmyById(armyId)
 	self:setArmyNum(self:getArmyNum() - 1)
-	army:setTag(const.NORMAL_ARMY)
   	army:Walk()
   	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
   	army:setPhysics()
+  	army:setDefaultSpeed()
   	self.Layer:addChild(army,10)
-
-  	local speed = ArmyManager.getSpeed(armyId)
-  	army:setSpeed(speed)
+	--设置怪物策略
+	army:setAction()
 end
 
 function StartScene:getArmyId()
@@ -403,10 +413,12 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 			local score = GameFuc.getNeedScore(bodyArmy:getScore())
 			local recoverHp = GameFuc.getRecoverHp(bodyArmy:getRecoverHp())
 			self:defeatArmy( score , recoverHp )
+			bodyArmy:StopMove()
 			bodyArmy:playDefeatEffect()
 
 			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
 				cc.RemoveSelf:create(false)))
+			GameFuc.dispatchEvent( EventConst.HERO_HIT_NORMAL_ARMY )
 		else
 			armyId = bodyArmy:getId()
 			showHeroInjure( armyId)

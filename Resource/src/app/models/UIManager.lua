@@ -27,3 +27,17 @@ function createTimePanel()
 	panel:setCameraMask(cc.CameraFlag.USER2)
 	return panel
 end
+
+--创建控制器
+function createGamePad()
+	local panel = require("app.Panel.GamePadPanel").new()
+	panel:setCameraMask(cc.CameraFlag.USER2)
+	return panel
+end
+
+--创建技能栏
+function createSkillPanel()
+	local panel = require("app.Panel.SkillPanel").new()
+	panel:setCameraMask(cc.CameraFlag.USER2)
+	return panel
+end

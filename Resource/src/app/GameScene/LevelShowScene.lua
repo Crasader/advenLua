@@ -27,6 +27,8 @@ function LevelShowScene:initWidget()
 	levelText:setString(str)
 	self:addChild( widget )
 
+	local time = LevelManager.getLevelTime()
+	UserDataManager.getInstance():setTime( time )
 
 	self.widget = widget
 end
