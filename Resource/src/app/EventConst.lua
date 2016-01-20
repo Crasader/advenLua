@@ -6,6 +6,8 @@ BOSS_SHOOT				=  "bossShoot"
 
 --主角打击到普通怪物
 HERO_HIT_NORMAL_ARMY  = "heroHitNormalArmy"
+--角色被普通怪物打击到
+NORMAL_ARMY_HIT_HERO  = "normalArmyHitHero"
 
 --主角死亡事件
 HERO_DIE			= "heroDie"

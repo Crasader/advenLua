@@ -153,7 +153,9 @@ function StartScene:addUI(  )
 	self.Layer = layer
 	--add Back
 	local backGround = LevelManager.getLevel()
-
+	local size = backGround:getContentSize()
+	local heroPoint = backGround:getObjectGroup("People"):getObject("hero")
+	self.armyPosX = heroPoint["x"]
 	self.Layer:addChild(backGround)
 	--控制背景层
 	local mapController = ObjectManager.createMapControl(backGround)
@@ -167,7 +169,7 @@ function StartScene:addUI(  )
 	--add Hp
 	local hpPanel = UIManager.createHpBar()
 	--初始化设置其hp
-	hpPanel:setPosition(cc.p(100, display.height - 20))
+	hpPanel:setPosition(cc.p(150, display.height - 20))
 	self.hpWidget = hpPanel
 	self.Layer:addChild(hpPanel,20)
 
@@ -208,17 +210,23 @@ end
 function StartScene:setPhysicsCondition(  )
 	local physicsWorld = self:getPhysicsWorld()
 	physicsWorld:setGravity(cc.p(0,-500))
-	-- physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
+	physicsWorld:setDebugDrawMask(cc.PhysicsWorld.DEBUGDRAW_ALL)
 end
 
 function StartScene:addMainCharacter(  )
 	--添加物理世界框
 	local wall = PhysicsManager.createWall()
-	wall:setPosition(cc.p(display.cx, display.height +  275/2 ))
+	wall:setPosition(cc.p(0, 275/2 ))
 	self.Layer:addChild(wall,20)
+
+	--添加死亡盒子
+	local deadBox = PhysicsManager.createDeadBox()
+	deadBox:setPosition(cc.p(0, 0))
+	self.Layer:addChild(deadBox, 20)
 
 	local sex = UserDataManager.getInstance():getPlayerSex()
 	self.hero = self:createHeroById(sex )
+	UserDataManager.getInstance():setHero(self.hero)
 	--
 	self.hero:setPosition(cc.p(display.cx/2 - 200, 275 ))
 	--最后才设置位置
@@ -252,10 +260,12 @@ function StartScene:createArmy(  )
 	local army = ArmyManager.getArmyById(armyId)
 	self:setArmyNum(self:getArmyNum() - 1)
   	army:Walk()
-  	army:setPosition(cc.p(display.cx*2, 275/2 + 25))
+  	local gameSize = GameDataManager.getInstance():getMapSize()
+  	army:setPosition(cc.p(gameSize.width  , 275/2 + 25 ))
   	army:setPhysics()
   	army:setDefaultSpeed()
   	self.Layer:addChild(army,10)
+  	local size = army:getArmySize()
 	--设置怪物策略
 	army:setAction()
 end
@@ -370,6 +380,9 @@ function StartScene:addPhysicsEvent(  )
 		--子弹与子弹不进行碰撞模拟
 		elseif GameFuc.isBulletContactWithBullet(spriteA , spriteB) then 
 			return false
+		--主角与死亡触发器不进行碰撞模拟
+		elseif GameFuc.isContactWithDeadBox(spriteA, spriteB) then 
+			return false
 		else
 			return true
 		end
@@ -384,6 +397,7 @@ end
 function StartScene:dealPhysicsContact( spriteA, spriteB )
 	local function showHeroInjure( hurtId )
 		self.hero:Injure()
+		GameFuc.dispatchEvent( EventConst.NORMAL_ARMY_HIT_HERO )
 		local deltaHp = self:getDeltaHp( hurtId )
 		self.hero:MinitesHp(deltaHp)
 		if self.hero:getHp() <= 0 then
@@ -418,7 +432,6 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 
 			bodyArmy:runAction(cc.Sequence:create( cc.RotateBy:create(1, 720),
 				cc.RemoveSelf:create(false)))
-			GameFuc.dispatchEvent( EventConst.HERO_HIT_NORMAL_ARMY )
 		else
 			armyId = bodyArmy:getId()
 			showHeroInjure( armyId)
@@ -455,8 +468,15 @@ function StartScene:dealPhysicsContact( spriteA, spriteB )
 
 	--主角与地板的碰撞
 	if GameFuc.isHeroContactWithWall( spriteA, spriteB ) then 
-		local event = cc.EventCustom:new( EventConst.HERO_ON_WALL )
-		cc.Director:getInstance():getEventDispatcher():dispatchEvent(event)
+		GameFuc.dispatchEvent( EventConst.HERO_ON_WALL )
+	end
+
+	--与死亡碰撞器的碰撞
+	if GameFuc.isContactWithDeadBox(spriteA, spriteB) then
+		--如果是主角
+		if GameFuc.getHero( spriteA, spriteB ) ~= nil then 
+			GameFuc.dispatchEvent( EventConst.HERO_DIE )
+		end
 	end
 	
 end

@@ -40,7 +40,7 @@ end
 function NormalArmy:setDefaultSpeed()
 	local id = self:getId()
 	local speed = ArmyManager.getSpeed(id)
-	self:setSpeed(speed)
+	self:setSpeed(cc.p(-100, 0))
 end
 
 function NormalArmy:getId()
@@ -83,6 +83,10 @@ function NormalArmy:initWidget()
 	local scaleFactor = 1.5
 	self:setScaleX(scaleFacX  * scaleFactor)
 	self:setScaleY(scaleFacY * scaleFactor)
+end
+
+function NormalArmy:getArmySize()
+	return self.body:getContentSize()
 end
 
 --模型相关

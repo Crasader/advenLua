@@ -24,7 +24,9 @@ end
 
 function MapController:initData()
 	local size = self.map_:getContentSize()
-	GameDataManager.getInstance():saveMapSize(size)
+	--测试例子，设置地图大小
+	local MapSize = cc.size(size.width * 2, size.height)
+	GameDataManager.getInstance():saveMapSize(MapSize)
 end
 
 function MapController:initEvent()

@@ -54,6 +54,14 @@ function isHeroContactWithWall( spriteA,  spriteB )
 	return false
 end
 
+--是否与死亡碰撞器碰撞
+function isContactWithDeadBox( spriteA, spriteB)
+	if spriteA and (spriteA:getTag() == const.DEAD_BOX) or spriteB and (spriteB:getTag() == const.DEAD_BOX ) then
+		return true
+	end
+	return false
+end
+
 --根据传入碰撞的两个物体获得主角
 function getHero( spriteA, spriteB )
 	if spirteA and ( spriteA:getTag() == const.HERO ) then 
@@ -63,6 +71,8 @@ function getHero( spriteA, spriteB )
 	if spriteB and ( spriteB:getTag() == const.HERO ) then 
 		return spriteB
 	end
+
+	return nil
 end
 
 --根据传入碰撞的两个物体获得普通怪物

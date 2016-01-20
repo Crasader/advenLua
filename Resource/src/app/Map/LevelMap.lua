@@ -3,7 +3,7 @@ local LevelMap = class("LevelMap", function (  )
 end)
 
 function LevelMap:ctor()
-
+	
 end
 
 return LevelMap

@@ -29,8 +29,7 @@ function CameraControler:OnUpdate()
 
 	--使用定时器
 	local function changePos(dt)
-		
-		
+		self:controlHeroScrollMap()
 	end
 	self.handler = GameFuc.setUpdate(changePos, 1/60,false)
 end
@@ -60,8 +59,8 @@ function CameraControler:addEvent()
 	local MoveLeftListener = cc.EventListenerCustom:create(EventConst.SCROLL_LEFT, handler(self, self.MoveBgLeft))
 	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(MoveLeftListener, self)
 
-	local hitNormalArmyListener = cc.EventListenerCustom:create(EventConst.HERO_HIT_NORMAL_ARMY, handler(self, self.shake))
-	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(hitNormalArmyListener, self)
+	local hitNormalHeroListener = cc.EventListenerCustom:create(EventConst.NORMAL_ARMY_HIT_HERO, handler(self, self.shake))
+	cc.Director:getInstance():getEventDispatcher():addEventListenerWithSceneGraphPriority(hitNormalHeroListener, self)
 end
 
 function CameraControler:MoveBgRight()
@@ -70,6 +69,7 @@ function CameraControler:MoveBgRight()
 		local mapSize = GameDataManager.getInstance():getMapSize()
 		if mapSize.width - display.cx >= posx then 
 			self.mapCamera:setPositionX(posx + 1)
+			self.mainCamera:setPositionX(posx + 1)
 			UserDataManager.getInstance():mapCameraMove()
 		end
 	end
@@ -80,6 +80,7 @@ function CameraControler:MoveBgLeft()
 		local posx, posy = self.mapCamera:getPosition()
 		if posx >= display.cx then 
 			self.mapCamera:setPositionX(posx - 1)
+			self.mainCamera:setPositionX(posx - 1)
 			UserDataManager.getInstance():mapCameraMove()
 		else
 			UserDataManager.getInstance():mapCameraStop()
@@ -91,6 +92,21 @@ end
 function CameraControler:MoveBgView()
 	--发送事件移动摄像机
 	GameFuc.dispatchEvent( EventConst.SCROLL_VIEW)
+end
+
+function CameraControler:controlHeroScrollMap()
+	local hero = UserDataManager.getInstance():getHero()
+	local posx, posy = hero:getPosition()
+	local dir = hero:getDirection()
+	local deltaX = posx - display.cx /2
+	if posx < display.cx/2 and posx > 0 then
+	--到达屏幕1/3点时候就右移画面
+	elseif posx >= display.cx/2 and posx <= GameDataManager.getInstance():getMapSize().width - display.cx* 1.5 then 
+		self.mainCamera:setPositionX( self.originPosition.x + deltaX)
+		self.mapCamera:setPositionX( self.originPosition.x + deltaX)
+	else
+
+	end
 end
 
 function CameraControler:init()
@@ -168,7 +184,7 @@ function CameraControler:playMoveAction()
 end
 
 function CameraControler:shake()
-	local act = cc.Sequence:create( cc.MoveBy:create(0.1, cc.vec3(0, 2, 0)),cc.MoveBy:create(0.1, cc.vec3(0, -2, 0)) )
+	local act = cc.Sequence:create( cc.MoveBy:create(0.1, cc.vec3(0, 5, 0)),cc.MoveBy:create(0.1, cc.vec3(0, -5, 0)) )
 	self.mapCamera:runAction(act)
 end
 

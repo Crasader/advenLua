@@ -67,7 +67,6 @@ end
 
 --获取敌人的速度
 function getSpeed( id )
-	print("id", id)
 	if not id then return ArmySpeed[1] end
 	return ArmySpeed[id]	
 end

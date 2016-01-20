@@ -34,6 +34,14 @@ function initDefault(self)
 	self:setDefaultTime()
 end
 
+function setHero(self, hero_)
+	self.hero_ = hero_
+end
+
+function getHero(self)
+	return self.hero_
+end
+
 --消耗一条生命之后重置生命值
 function reset(self)
 	self:setDefaultHp(100)

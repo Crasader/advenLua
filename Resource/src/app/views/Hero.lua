@@ -54,27 +54,23 @@ end
 function Hero:Move()
 	--在没到达一定距离时候自己移动
 	local posx, posy = self:getPosition()
-	if posx < display.cx/3 and posx > 0 then
-		if self.dir == -1 then 
-			if self:isCanMoveLeft() then 
-				self:setPositionX(posx + self.dir)
-			end
+	local dir = self:getDirection()
+	if posx < GameDataManager.getInstance():getMapSize().width - 100 then
+		if posx < 100 and dir == -1 then
+
 		else
-			self:setPositionX(posx + self.dir)
+			self:setPositionX(posx + self.dir * 5)
 		end
-	--到达屏幕1/3点时候就右移画面
-	elseif posx >= display.cx/3 then 
-		if self.dir == 1 then 
-			GameFuc.dispatchEvent(EventConst.SCROLL_RIGHT)
-		--这个时候想做走就
-		elseif self.dir == -1 then 
-			if UserDataManager.getInstance():isMapCameraStop() == false then
-				GameFuc.dispatchEvent(EventConst.SCROLL_LEFT)
-			elseif UserDataManager.getInstance():isMapCameraStop() == true then 
-				self:setPositionX(posx + self.dir)
-			end
+	else
+		if dir == -1 then
+			self:setPositionX(posx + self.dir * 5)
 		end
 	end
+
+end
+
+function Hero:getDirection()
+	return self.dir
 end
 
 function Hero:isCanMoveLeft()
@@ -102,6 +98,18 @@ function Hero:initData(  )
 	self:setTag(const.HERO)
 	--方向0为不动，-1向左，1为向右
 	self.dir = 0
+
+	--加速度
+	self:SetAcc(2)
+end
+
+--获得加速度
+function Hero:SetAcc(num)
+	self.acclec_ = num
+end
+
+function Hero:GetAcc()
+	return self.acclec_
 end
 
 function Hero:ChangeDir( dir )
@@ -110,7 +118,7 @@ end
 
 function Hero:setPhysics()
 	--给英雄设置物理边框
-	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(120,250)))
+	self:setPhysicsBody(cc.PhysicsBody:createBox(cc.size(120,250), cc.PhysicsMaterial(1500 ,0.0, 0.0)))
 	--设置碰撞和接触掩码
 	self:getPhysicsBody():setContactTestBitmask(1)
 	
@@ -192,6 +200,12 @@ function Hero:addEvent()
 		if keycode == cc.KeyCode.KEY_K then 
 			GameFuc.dispatchEvent(EventConst.HERO_JUMP)
 		end
+
+		if keycode == cc.KeyCode.KEY_Q then 
+			require "init"
+			local scene = SceneManager.createLoadingScene()
+			cc.Director:getInstance():replaceScene(scene)
+		end
 	end
 
 	local function okKeyRelease(keycode, event)
@@ -214,7 +228,6 @@ function Hero:MoveAttack()
 end
 
 function Hero:MoveJump()
-	self:OffUpdate()
 	self:Jump()
 end
 
@@ -223,11 +236,14 @@ function Hero:MoveIdle()
 end
 
 function Hero:MoveLeft()
+	if self:getState() == const.HERO_ATTACK then return end
 	self:ChangeDir(-1)
 	self:Walk()
 end
 
 function Hero:MoveRight()
+	--攻击时刻不能移动
+	if self:getState() == const.HERO_ATTACK then return end
 	self:ChangeDir(1)
 	self:Walk()
 end
@@ -242,18 +258,9 @@ function Hero:onMove()
 end
 
 function Hero:setAnimationEvent(event)
-		 print(string.format("[spine] %d event: %s, %d, %f, %s", 
-                              event.trackIndex,
-                              event.eventData.name,
-                              event.eventData.intValue,
-                              event.eventData.floatValue,
-                              event.eventData.stringValue)) 
-
 		 if event.eventData.name == "attack_end" then 
 		 	--空中不改变状态
-		 	print("self:getState()", self:getState())
-		 	if const.HERO_AIRATTACK == self:getState()   or const.HERO_JUMP == self:getPreState() or self:getState() == const.HERO_DIE 
-		 		or const.HERO_WALK == self:getState() then
+		 	if const.HERO_AIRATTACK == self:getState()   or const.HERO_JUMP == self:getPreState() or self:getState() == const.HERO_DIE then
 		 		return 
 		 	else
 		 		self:OnUpdate()
@@ -264,7 +271,6 @@ function Hero:setAnimationEvent(event)
 end
 
 function Hero:Attack()
-	--走的时候不响应攻击
 	if self:getState() ~= const.HERO_ATTACK  and 
 		self:getState() ~= const.HERO_DIE then
 		self:setAnimation(1, "attack", false)
@@ -277,7 +283,6 @@ end
 function Hero:Jump()
 	--走路和攻击时候和死亡不可跳跃
 	if self:getState() ~= const.HERO_JUMP and self:getState() ~= const.HERO_ATTACK and self:getState() ~= const.HERO_DIE then
-		-- self:setAnimation(0, "attack", false)
 		self:runAction(cc.JumpBy:create(1, cc.p(0,500), display.cy/2, 1))
 		self:setAnimation(0, "jump", false)
 		self:changeState(const.HERO_JUMP)
@@ -292,6 +297,7 @@ function Hero:Idle()
 end
 
 function Hero:Walk()
+	--攻击时刻不能走
 	if self:getState() ~= const.HERO_WALK and self:getState() ~= const.HERO_DIE then 
 		self:setAnimation(0, "walk", true)
 		self:changeState(const.HERO_WALK)
