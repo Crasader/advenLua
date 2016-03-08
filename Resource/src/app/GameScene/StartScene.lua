@@ -152,13 +152,10 @@ function StartScene:addUI(  )
 	self:addChild(layer)
 	self.Layer = layer
 	--add Back
-	local backGround = LevelManager.getLevel()
-	local size = backGround:getContentSize()
-	local heroPoint = backGround:getObjectGroup("People"):getObject("hero")
-	self.armyPosX = heroPoint["x"]
-	self.Layer:addChild(backGround)
-	--控制背景层
-	local mapController = ObjectManager.createMapControl(backGround)
+	-- local backGround = LevelManager.getLevel()
+	-- self.Layer:addChild(backGround)
+	-- --控制背景层
+	local mapController = ObjectManager.createMapControl()
 	self.Layer:addChild(mapController)
 	
 	--添加暂停键
@@ -261,7 +258,8 @@ function StartScene:createArmy(  )
 	self:setArmyNum(self:getArmyNum() - 1)
   	army:Walk()
   	local gameSize = GameDataManager.getInstance():getMapSize()
-  	army:setPosition(cc.p(gameSize.width  , 275/2 + 25 ))
+  	local posNum = HelpFuc.getRandom( 1, 8 )
+  	army:setPosition(cc.p(gameSize.width / 8 * posNum , 275/2 + 25 ))
   	army:setPhysics()
   	army:setDefaultSpeed()
   	self.Layer:addChild(army,10)

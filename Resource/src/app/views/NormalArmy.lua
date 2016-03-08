@@ -35,6 +35,8 @@ function NormalArmy:initData()
 	self:setRecoverHp( recoverHp )
 
 	self:setTag(const.NORMAL_ARMY)
+
+	self.moveAct =  nil
 end
 
 function NormalArmy:setDefaultSpeed()
@@ -71,7 +73,7 @@ end
 function NormalArmy:initWidget()
 	local bodyName = self.fileTbl.mainBody
 	self.body = self:getChildByName( bodyName )
-	self:getChildByName(bodyName):setFlippedX(true)
+	self:faceLeft()
 
 	--设置怪物的大小
 	local height = display.height
@@ -83,6 +85,23 @@ function NormalArmy:initWidget()
 	local scaleFactor = 1.5
 	self:setScaleX(scaleFacX  * scaleFactor)
 	self:setScaleY(scaleFacY * scaleFactor)
+end
+
+function NormalArmy:faceLeft()
+	self.body:setFlippedX(true)
+end
+
+function NormalArmy:faceRight()
+	self.body:setFlippedX(false)
+end
+
+function NormalArmy:reverseFace()
+	local isLeft = self.body:isFlippedX()
+	if isLeft == true then 
+		self:faceRight()
+	else
+		self:faceLeft()
+	end
 end
 
 function NormalArmy:getArmySize()
@@ -132,9 +151,9 @@ function NormalArmy:setAction()
 	if num == 1 then 
 		self:DelayJump()
 	elseif num == 2 then 
-		self:DelaySpeedUp()
+		self:WalkAway()
 	elseif num == 3 then 
-		self:DelaySpeedDown()
+		self:WalkThrought()
 	elseif num == 4 then 
 		self:DelaySpeedUp()
 	elseif num == 5 then 
@@ -142,6 +161,21 @@ function NormalArmy:setAction()
 	elseif num == 6 then 
 		self:SpeedUpDown()
 	end
+end
+
+function NormalArmy:WalkAway()
+
+end
+
+function NormalArmy:WalkThrought()
+	local function reverseAct()
+		self:reverseFace()
+		self:reverseSpeed()
+	end
+
+	local act = cc.Sequence:create( cc.DelayTime:create( 3 ), cc.CallFunc:create( reverseAct ) )
+	self:runAction( cc.RepeatForever:create( act )  )
+	self.moveAct = act
 end
 
 function NormalArmy:DelaySpeedUp()
@@ -194,13 +228,22 @@ function NormalArmy:SpeedUpDown()
 	self.moveAct = act
 end
 
---角色一段时间后跳跃
+--角色一段时间后跳跃两次
 function NormalArmy:DelayJump()
 	local function setJump()
 		local speed = self:getSpeed()
 		self:setSpeed(cc.p( speed.x, 400 ))
 	end
-	local act = cc.Sequence:create(cc.CallFunc:create( setJump ), cc.DelayTime:create(2))
+
+	local function setReverseSpeedX()
+		self:reverseFace()
+		local speed = self:getSpeed()
+		self:setSpeed(cc.p( -speed.x, speed.y ))
+	end
+	local actions = {cc.CallFunc:create( setJump ), cc.DelayTime:create(3), cc.CallFunc:create( setJump ), cc.DelayTime:create(3),
+					cc.CallFunc:create( setReverseSpeedX ), cc.DelayTime:create(1)}
+
+	local act = cc.Sequence:create( actions )
 	local moveAct = cc.RepeatForever:create(act)
 	self:runAction( moveAct)
 	self.moveAct = moveAct
@@ -229,6 +272,11 @@ end
 
 function NormalArmy:getSpeed()
 	return self:getPhysicsBody():getVelocity()
+end
+
+function NormalArmy:reverseSpeed()
+	local speed = self:getSpeed()
+	self:setSpeed( cc.p( -speed.x, speed.y ) )
 end
 
 return NormalArmy

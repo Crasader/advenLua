@@ -1,8 +1,7 @@
 module("LevelFactory", package.seeall)
 
 function createLevel_1(  )
-	-- local backGround = require("app.views.MainBg").new(MAP_DATA[1])
-	local backGround = require("app.Map.LevelMap").new()
+	local backGround = require("app.views.MainBg").new(MAP_DATA[1])
 	backGround:setCameraMask(cc.CameraFlag.USER1)
 	return backGround
 end

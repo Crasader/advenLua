@@ -29,6 +29,8 @@ require "app.GameFuc"
 require "app.UIFunc"
 --载入地图关卡用的函数
 require "app.LevelFuc"
+--辅助函数
+require "app.HelpFuc"
 
 --加载敌人生产工厂
 require("app.models.ArmyFactory")

@@ -5,7 +5,6 @@ end)
 function MapController:ctor( map )
 	if not map then 
 		print("there is no map")
-		return 
 	end
 	self.map_ = map
 	self:init()
@@ -23,7 +22,10 @@ function MapController:init()
 end
 
 function MapController:initData()
-	local size = self.map_:getContentSize()
+	local size = cc.size( display.width * 1.5 , 960 )
+	if self.map_ then
+		size = self.map_:getContentSize()
+	end
 	--测试例子，设置地图大小
 	local MapSize = cc.size(size.width * 2, size.height)
 	GameDataManager.getInstance():saveMapSize(MapSize)
